@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTabWidget" name="pages">
+   <widget class="QStackedWidget" name="stack_pages">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -24,24 +24,72 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page_start">
-     <attribute name="title">
-      <string>Tab 1</string>
-     </attribute>
+     <widget class="QFrame" name="frame_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>529</y>
+        <width>791</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QPushButton" name="pushButton">
+       <property name="geometry">
+        <rect>
+         <x>690</x>
+         <y>10</y>
+         <width>80</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Next</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="geometry">
+        <rect>
+         <x>600</x>
+         <y>10</y>
+         <width>80</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Back</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QStackedWidget" name="stack_start">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>791</width>
+        <height>501</height>
+       </rect>
+      </property>
+      <widget class="QWidget" name="page_welcome"/>
+      <widget class="QWidget" name="page_"/>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_home">
-     <attribute name="title">
-      <string>Tab 2</string>
-     </attribute>
      <widget class="QFrame" name="frame">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
         <width>791</width>
-        <height>81</height>
+        <height>71</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -53,22 +101,22 @@
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>170</x>
-         <y>10</y>
-         <width>451</width>
+         <x>140</x>
+         <y>0</y>
+         <width>521</width>
          <height>71</height>
         </rect>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt;&quot;&gt;veX's Lethal Company Mod - Installer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt;&quot;&gt;veX's Lethal Company Modpack Manager&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
      <widget class="QPushButton" name="btn_update">
       <property name="geometry">
        <rect>
-        <x>650</x>
-        <y>500</y>
+        <x>660</x>
+        <y>530</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -80,8 +128,8 @@
      <widget class="QPushButton" name="btn_install">
       <property name="geometry">
        <rect>
-        <x>530</x>
-        <y>500</y>
+        <x>540</x>
+        <y>530</y>
         <width>111</width>
         <height>41</height>
        </rect>
