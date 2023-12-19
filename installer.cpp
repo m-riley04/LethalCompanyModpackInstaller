@@ -1,7 +1,14 @@
 #include "installer.h"
+#include <filesystem>
+#include <QDebug>
 
+//=== EXCEPTIONS
+const char * GameNotFoundException::what() const noexcept {
+    return "The game not found.";
+}
+
+//=== CONSTRUCTORS
 Installer::Installer() {}
-
 
 //=== FUNCTIONALITIES
 // Updates the modpack
