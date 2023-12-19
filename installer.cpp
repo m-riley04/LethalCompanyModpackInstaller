@@ -35,6 +35,38 @@ void Installer::disable() {
 
 }
 
+// Finds the game's installation directory
+std::string Installer::findGameInstallation() {
+    // Check common drives
+    std::string commonDrives[10] = {"C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
+    std::filesystem::path gamePath;
+    std::string gameName = "Lethal Company";
+
+    // Iterate through each drive
+    for (auto & drive : commonDrives) {
+
+        std::string pathStr = drive;
+        pathStr += ":\\SteamLibrary\\steamapps\\common";
+        gamePath /= pathStr;
+        gamePath /= gameName;
+
+        qDebug() << gamePath.string();
+
+        // Check if the Steam game exists
+        if (std::filesystem::exists(gamePath)) {
+            gameLocation = gamePath.string();
+            gameDrive = drive;
+            gameDrive += ":\\";
+            return gamePath.string();
+        }
+
+        // Otherwise, try again
+        gamePath.clear();
+    }
+
+    throw GameNotFoundException();
+}
+
 //=== STATUS
 // Returns whether the modpack is updated to the latest release or not
 bool Installer::isUpdated() {
