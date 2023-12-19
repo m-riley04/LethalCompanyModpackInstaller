@@ -91,7 +91,13 @@ bool Installer::isUpdated() {
 // Returns the current version
 std::string Installer::getVersion() { return this->version; }
 
+int Installer::getSpaceAvailable() {
+    return std::filesystem::space(std::filesystem::path(gameDrive)).available;
+}
+
 //=== SETTERS
 // Sets the current version
 void Installer::setVersion(std::string version) { this->version = version; }
+
+
 
