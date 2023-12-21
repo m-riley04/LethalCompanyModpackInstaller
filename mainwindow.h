@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "installer.h"
+#include "manager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -41,6 +41,6 @@ private:
     Ui::MainWindow *ui;
     bool pageCompleted;
     std::string installLocation;
-    Installer installer;
+    Manager manager;
 };
 #endif // MAINWINDOW_H

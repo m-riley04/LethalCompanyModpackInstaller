@@ -45,12 +45,12 @@ void MainWindow::initialize_configuration() {
 
     try {
         // Find the game installation
-        installLocation = installer.findGameInstallation();
+        installLocation = manager.locateGameLocation();
         ui->line_lethalCompanyLocation->setText(QString(installLocation.c_str()));
         ui->label_found->setText(QString("Yes"));
 
         // Find the space available
-        std::string spaceAvailable = std::to_string(double(installer.getSpaceAvailable()/10000000000.0));
+        std::string spaceAvailable = std::to_string(double(manager.getInstaller().getSpaceAvailable()/10000000000.0));
         ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
     } catch (GameNotFoundException e) {
         ui->label_found->setText(QString("No"));
@@ -159,7 +159,7 @@ void MainWindow::typed_gameLocation() {
         installLocation = ui->line_lethalCompanyLocation->text().toStdString();
         ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
         // Find the space available
-        std::string spaceAvailable = std::to_string(double(installer.getSpaceAvailable()/10000000000.0));
+        std::string spaceAvailable = std::to_string(double(manager.getInstaller().getSpaceAvailable()/10000000000.0));
         ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
         return;
     }
