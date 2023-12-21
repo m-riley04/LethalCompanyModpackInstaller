@@ -24,6 +24,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         installer.h installer.cpp
+        downloader.h downloader.cpp
+        manager.h manager.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LethalCompanyModpackInstaller APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -43,7 +45,10 @@ else()
     endif()
 endif()
 
-target_link_libraries(LethalCompanyModpackInstaller PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(LethalCompanyModpackInstaller
+    PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -57,6 +62,7 @@ set_target_properties(LethalCompanyModpackInstaller PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
+
 )
 
 include(GNUInstallDirs)
