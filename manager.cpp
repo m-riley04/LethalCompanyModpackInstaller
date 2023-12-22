@@ -46,9 +46,16 @@ void Manager::download() {
 void Manager::downloadBepInEx() {
     std::string bepinexURL = "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/";
 
-    // Get the bepinex files
-    this->downloader.download(bepinexURL, gameDirectory);
+    // Download the bepinex files
+    if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\latest_release.zip"))) {
+        this->downloader.download(bepinexURL, cacheDirectory);
+    }
+
+    // Extract the zip file to the cache directory
     qDebug() << "Extracting downloaded zip file...";
+    std::string zip = cacheDirectory + "\\BepInEx.zip";
+    std::string output = cacheDirectory + "\\BepInEx";
+    ZipHandler::extract(zip, output);
 }
 
 void Manager::install() {
