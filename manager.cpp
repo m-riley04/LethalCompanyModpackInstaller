@@ -63,16 +63,16 @@ void Manager::installBepInEx() {
 
 // Updates the modpack
 void Manager::update() {
+    // Download the latest version of the modpack
+    download();
+
     // Delete the current modpack files
     clearPlugins();
     clearConfig();
     clearPatchers();
 
-    // Download the latest version of the modpack
-
-
     // Install the latest version of the modpack
-
+    install();
 }
 
 // Enables the modpack
