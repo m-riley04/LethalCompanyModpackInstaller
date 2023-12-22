@@ -4,12 +4,6 @@
 #include "downloader.h"
 #include "installer.h"
 
-class GameNotFoundException : public std::exception
-{
-public:
-    const char * what() const noexcept override;
-};
-
 class Manager
 {
 public:

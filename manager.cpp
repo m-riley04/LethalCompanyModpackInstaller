@@ -1,10 +1,5 @@
 #include "manager.h"
 
-//=== EXCEPTIONS
-const char * GameNotFoundException::what() const noexcept {
-    return "The game directory was not found.";
-}
-
 //=== CONSTRUCTORS
 Manager::Manager() {}
 
