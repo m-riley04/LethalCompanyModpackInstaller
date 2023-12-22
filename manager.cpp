@@ -21,11 +21,16 @@ Manager::Manager() {
 
 //=== FUNCTIONALITIES
 void Manager::download() {
+    // Get the latest release URL
+    qDebug() << "Grabbing latest release URL...";
     std::string latestReleaseURL = this->fetchLatestRelease("m-riley04", "TheWolfPack");
+    qDebug() << "Latest Release: " << latestReleaseURL;
     std::string url = this->fetchReleaseDownload(latestReleaseURL);
+    qDebug() << "Latest Release Download: " << url;
 
     // Get the
     this->downloader.download(url, gameDirectory);
+    qDebug() << "Extracting downloaded zip file...";
 }
 
 void Manager::downloadBepInEx() {
@@ -33,6 +38,7 @@ void Manager::downloadBepInEx() {
 
     // Get the bepinex files
     this->downloader.download(bepinexURL, gameDirectory);
+    qDebug() << "Extracting downloaded zip file...";
 }
 
 void Manager::install() {
