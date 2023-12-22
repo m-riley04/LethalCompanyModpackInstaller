@@ -9,14 +9,12 @@ public:
     Installer();
 
     //=== FUNCTIONALITIES
-    void install();
-    void uninstall();
+    void install(std::string &filesDirectory, std::string &gameDirectory);
+    void installBepInEx(std::string &filesDirectory, std::string &gameDirectory);
+    void uninstall(std::string &gameDirectory);
 
     //=== GETTERS
     int getInstallSize();
-    std::string getGameLocation();
-    std::string getGameDrive();
-    int getSpaceAvailable();
 
 private:
     int installSize;
