@@ -7,3 +7,7 @@ const char * GameNotFoundException::what() const noexcept {
 const char * InstallationFilesNotFoundException::what() const noexcept {
     return "The installation files were not found.";
 }
+
+const char * BepInExNotInstalledException::what() const noexcept {
+    return "The installation files were not found.";
+}
