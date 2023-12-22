@@ -1,7 +1,23 @@
 #include "manager.h"
 
 //=== CONSTRUCTORS
-Manager::Manager() {}
+Manager::Manager() {
+    std::filesystem::path cwd(std::filesystem::current_path());
+
+    // Check if cache directory exists
+    std::filesystem::path cachePath = cwd; cachePath /= "cache";
+    if (!std::filesystem::exists(cachePath)) {
+        std::filesystem::create_directory(cachePath);
+    }
+    this->cacheDirectory = cachePath.string();
+
+    // Check if user_data directory exists
+    std::filesystem::path userDataPath = cwd; userDataPath /= "user_data";
+    if (!std::filesystem::exists(userDataPath)) {
+        std::filesystem::create_directory(userDataPath);
+    }
+    this->userDataDirectory = userDataPath.string();
+}
 
 //=== FUNCTIONALITIES
 void Manager::download() {
