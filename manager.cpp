@@ -1,4 +1,7 @@
 #include "manager.h"
+#include <filesystem>
+#include "ziphandler.h"
+#include "appexceptions.h"
 
 //=== CONSTRUCTORS
 Manager::Manager() {
@@ -28,9 +31,16 @@ void Manager::download() {
     std::string url = this->fetchReleaseDownload(latestReleaseURL);
     qDebug() << "Latest Release Download: " << url;
 
-    // Get the
-    this->downloader.download(url, gameDirectory);
+    // Download the zip file to cache directory
+    if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\latest_release.zip"))) {
+        this->downloader.download(url, cacheDirectory);
+    }
+
+    // Extract the zip file to the cache directory
     qDebug() << "Extracting downloaded zip file...";
+    std::string zip = cacheDirectory + "\\latest_release.zip";
+    std::string output = cacheDirectory + "\\latest_release";
+    ZipHandler::extract(zip, output);
 }
 
 void Manager::downloadBepInEx() {
@@ -158,10 +168,12 @@ std::string Manager::fetchLatestRelease(std::string owner = "m-riley04", std::st
 
 // Returns a string of the lastest release's zipball download url
 std::string Manager::fetchReleaseDownload(std::string &url) {
+    QByteArray bytes = downloader.downloadJSONData(url);
+    QJsonDocument json = QJsonDocument::fromJson(bytes);
+    QJsonObject jsonObj = json.object();
 
-    QJsonDocument response = QJsonDocument::fromJson(downloader.downloadByteData(url));
-    QJsonObject json = response.object();
-    std::string downloadURL = json.value(QString("zipball_url")).toString().toStdString();
+    std::string downloadURL = jsonObj.value(QString("zipball_url")).toString().toStdString();
+
     return downloadURL;
 }
 
