@@ -52,8 +52,13 @@ void Manager::downloadBepInEx() {
 }
 
 void Manager::install() {
-    installer.install();
+    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
+    installer.install(installationFilesDirectory, gameDirectory);
+}
 
+void Manager::installBepInEx() {
+    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
+    installer.installBepInEx(installationFilesDirectory, gameDirectory);
 }
 
 // Updates the modpack
