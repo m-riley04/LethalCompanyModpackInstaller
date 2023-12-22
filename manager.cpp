@@ -189,10 +189,15 @@ std::string Manager::fetchReleaseDownload(std::string &url) {
 // Returns the current version
 std::string Manager::getVersion() { return this->version; }
 
-int Installer::getSpaceAvailable() {
+int Manager::getSpaceAvailable() {
     return std::filesystem::space(std::filesystem::path(gameDrive)).available;
 }
 
 //=== SETTERS
-// Sets the current version
-void Manager::setVersion(std::string version) { this->version = version; }
+void Manager::setVersion(std::string version) {
+    this->version = version;
+}
+
+void Manager::setGameDirectory(std::string directory) {
+    this->gameDirectory = directory;
+}
