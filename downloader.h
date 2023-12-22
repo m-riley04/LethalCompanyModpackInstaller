@@ -16,13 +16,16 @@ class Downloader
 {
 public:
     Downloader();
+    ~Downloader();
 
     void download(std::string &url, std::string &output);
-    void saveToDisk(QByteArray &data, std::string &filename, std::string &path);
-    QByteArray downloadByteData(std::string &url);
+    bool saveToDisk(QByteArray &data, std::string &filename, std::string &path);
+    QByteArray &downloadByteData(std::string &url);
+    QByteArray &downloadJSONData(std::string &url);
 
 private:
     QNetworkAccessManager webController;
+    QByteArray data;
 };
 
 #endif // DOWNLOADER_H
