@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "installer.h"
+#include "appexceptions.h"
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -39,18 +39,17 @@ void MainWindow::initialize_eula() {
 }
 
 void MainWindow::initialize_configuration() {
-    pageCompleted = false;
+    pageCompleted = true;
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(true);
 
     try {
         // Find the game installation
-        installLocation = manager.locateGameLocation();
-        ui->line_lethalCompanyLocation->setText(QString(installLocation.c_str()));
+        ui->line_lethalCompanyLocation->setText(QString(manager.locateGameLocation().c_str()));
         ui->label_found->setText(QString("Yes"));
 
         // Find the space available
-        std::string spaceAvailable = std::to_string(double(manager.getInstaller().getSpaceAvailable()/10000000000.0));
+        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
         ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
     } catch (GameNotFoundException e) {
         ui->label_found->setText(QString("No"));
@@ -61,6 +60,24 @@ void MainWindow::initialize_working() {
     pageCompleted = false;
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
+
+    // Check if BepInEx is insalled
+    if (!manager.isBepInExInstalled()) {
+        // Download BepInEx
+        manager.downloadBepInEx();
+
+        // Install BepInEx
+        manager.installBepInEx();
+    }
+
+    // Start download process
+    manager.download();
+
+    // Start installation process
+    manager.install();
+
+    // Successful
+    ui->stack_installation->setCurrentWidget(ui->page_done);
 }
 
 void MainWindow::initialize_done() {
@@ -82,6 +99,8 @@ void MainWindow::clicked_next() {
     if (nextIndex > ui->stack_installation->count()) {
         return;
     }
+
+    ui->stack_installation->setCurrentIndex(nextIndex);
 
     switch (nextIndex) {
     case (0):
@@ -106,8 +125,6 @@ void MainWindow::clicked_next() {
         initialize_welcome();
         break;
     }
-
-    ui->stack_installation->setCurrentIndex(nextIndex);
 }
 
 void MainWindow::clicked_back() {
@@ -117,6 +134,8 @@ void MainWindow::clicked_back() {
     if (previousIndex < 0) {
         return;
     }
+
+    ui->stack_installation->setCurrentIndex(previousIndex);
 
     switch (previousIndex) {
     case (0):
@@ -141,7 +160,6 @@ void MainWindow::clicked_back() {
         initialize_welcome();
         break;
     }
-    ui->stack_installation->setCurrentIndex(previousIndex);
 }
 
 void MainWindow::clicked_browse() {
@@ -156,10 +174,10 @@ void MainWindow::checked_eula() {
 void MainWindow::typed_gameLocation() {
     // Check if the typed path exists
     if (std::filesystem::exists(ui->line_lethalCompanyLocation->text().toStdString())) {
-        installLocation = ui->line_lethalCompanyLocation->text().toStdString();
+        manager.setGameDirectory(ui->line_lethalCompanyLocation->text().toStdString());
         ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
         // Find the space available
-        std::string spaceAvailable = std::to_string(double(manager.getInstaller().getSpaceAvailable()/10000000000.0));
+        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
         ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
         return;
     }

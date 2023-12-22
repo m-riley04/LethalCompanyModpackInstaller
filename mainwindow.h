@@ -40,7 +40,6 @@ public:
 private:
     Ui::MainWindow *ui;
     bool pageCompleted;
-    std::string installLocation;
     Manager manager;
 };
 #endif // MAINWINDOW_H
