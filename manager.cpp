@@ -87,18 +87,21 @@ void Manager::disable() {
 
 // Clears out the plugins folder
 void Manager::clearPlugins() {
-
+    std::filesystem::path pluginsPath(gameDirectory + "\\BepInEx\\plugins");
+    std::filesystem::remove(pluginsPath);
 }
 
 // Clears out the config folder
 void Manager::clearConfig() {
-
+    std::filesystem::path configPath(gameDirectory + "\\BepInEx\\config");
+    std::filesystem::remove(configPath);
 }
 
 
 // Clears out the patchers folder
 void Manager::clearPatchers() {
-
+    std::filesystem::path patchersPath(gameDirectory + "\\BepInEx\\patchers");
+    std::filesystem::remove(patchersPath);
 }
 
 //=== STATUS
