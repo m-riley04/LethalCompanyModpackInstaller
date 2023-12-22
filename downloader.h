@@ -18,7 +18,7 @@ public:
     Downloader();
     ~Downloader();
 
-    void download(std::string &url, std::string &output);
+    void download(std::string &url, std::string &output, std::string name);
     bool saveToDisk(QByteArray &data, std::string &filename, std::string &path);
     QByteArray &downloadByteData(std::string &url);
     QByteArray &downloadJSONData(std::string &url);

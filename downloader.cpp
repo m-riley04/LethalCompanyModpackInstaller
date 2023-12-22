@@ -7,7 +7,7 @@ Downloader::Downloader() {}
 Downloader::~Downloader() {}
 
 // Downloads a url to a given output path
-void Downloader::download(std::string &url, std::string &output) {
+void Downloader::download(std::string &url, std::string &output, std::string name = "latest_release") {
     qDebug() << "Preparing to download...";
     qDebug() << "Chosen URL: '" << url << "'";
 
@@ -16,7 +16,6 @@ void Downloader::download(std::string &url, std::string &output) {
     qDebug() << "Downloaded byte data.";
 
     // Save the byte data to the disk
-    std::string name = "latest_release";
     this->saveToDisk(data, name, output);
 }
 
