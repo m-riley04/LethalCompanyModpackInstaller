@@ -32,14 +32,15 @@ void Manager::download() {
     qDebug() << "Latest Release Download: " << url;
 
     // Download the zip file to cache directory
+    std::string filename = "latest_release";
     if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\latest_release.zip"))) {
-        this->downloader.download(url, cacheDirectory);
+        this->downloader.download(url, cacheDirectory, filename);
     }
 
     // Extract the zip file to the cache directory
     qDebug() << "Extracting downloaded zip file...";
-    std::string zip = cacheDirectory + "\\latest_release.zip";
-    std::string output = cacheDirectory + "\\latest_release";
+    std::string zip = cacheDirectory + "\\" + filename + ".zip";
+    std::string output = cacheDirectory + "\\" + filename;
     ZipHandler::extract(zip, output);
 }
 
@@ -47,8 +48,8 @@ void Manager::downloadBepInEx() {
     std::string bepinexURL = "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/";
 
     // Download the bepinex files
-    if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\latest_release.zip"))) {
-        this->downloader.download(bepinexURL, cacheDirectory);
+    if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\BepInEx.zip"))) {
+        this->downloader.download(bepinexURL, cacheDirectory, "BepInEx");
     }
 
     // Extract the zip file to the cache directory
@@ -64,7 +65,7 @@ void Manager::install() {
 }
 
 void Manager::installBepInEx() {
-    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
+    std::string installationFilesDirectory = cacheDirectory + "\\BepInEx";
     installer.installBepInEx(installationFilesDirectory, gameDirectory);
 }
 
@@ -104,7 +105,6 @@ void Manager::clearConfig() {
     std::filesystem::remove(configPath);
 }
 
-
 // Clears out the patchers folder
 void Manager::clearPatchers() {
     std::filesystem::path patchersPath(gameDirectory + "\\BepInEx\\patchers");
@@ -131,8 +131,9 @@ bool Manager::isBepInExInstalled() {
     if (!std::filesystem::exists(path)) {
         throw GameNotFoundException();
     }
-    for (auto & entry : path) {
-        if (entry.filename().string() == "BepInEx") {
+    for (auto & entry : std::filesystem::directory_iterator(path)) {
+        qDebug() << entry.path().filename().string();
+        if (entry.path().filename().string() == "BepInEx") {
             return true;
         }
     }
