@@ -54,6 +54,15 @@ void MainWindow::initialize_configuration() {
     } catch (GameNotFoundException e) {
         ui->label_found->setText(QString("No"));
     }
+
+    try {
+        // Find BepInEx installation
+        manager.isBepInExInstalled();
+        ui->label_bepinexFound->setText(QString("Yes"));
+
+    } catch (BepInExNotInstalledException e) {
+        ui->label_bepinexFound->setText(QString("No"));
+    }
 }
 
 void MainWindow::initialize_working() {
