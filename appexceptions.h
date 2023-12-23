@@ -21,4 +21,10 @@ public:
     const char * what() const noexcept override;
 };
 
+class BepInExInstallationError : public std::exception
+{
+public:
+    const char * what() const noexcept override;
+};
+
 #endif // APPEXCEPTIONS_H

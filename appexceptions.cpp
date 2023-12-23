@@ -9,5 +9,9 @@ const char * InstallationFilesNotFoundException::what() const noexcept {
 }
 
 const char * BepInExNotInstalledException::what() const noexcept {
-    return "The installation files were not found.";
+    return "BepInEx is not installed.";
+}
+
+const char * BepInExInstallationError::what() const noexcept {
+    return "There was an issue installing BepInEx.";
 }
