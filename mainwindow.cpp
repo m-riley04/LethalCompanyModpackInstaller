@@ -163,7 +163,21 @@ void MainWindow::clicked_back() {
 }
 
 void MainWindow::clicked_browse() {
-    QFileDialog::getExistingDirectory();
+    std::string path = QFileDialog::getExistingDirectory().toStdString();
+
+    if (std::filesystem::exists(path) && path != "") {
+        manager.setGameDirectory(path);
+        ui->line_lethalCompanyLocation->setText(QString(path.c_str()));
+        ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
+
+        // Find the space available
+        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
+        ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
+        return;
+    }
+    ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
+
+
 }
 
 void MainWindow::checked_eula() {
