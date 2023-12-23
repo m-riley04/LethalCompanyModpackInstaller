@@ -58,6 +58,7 @@ void Installer::install(std::string &filesDirectory, std::string &gameDirectory)
     if (std::filesystem::exists(patchersDirectory)) {
         std::filesystem::remove_all(patchersDirectory);
     }
+    // Remove all files except for BepInEx config
     if (std::filesystem::exists(configDirectory)) {
         std::filesystem::remove_all(configDirectory);
     }
@@ -65,13 +66,9 @@ void Installer::install(std::string &filesDirectory, std::string &gameDirectory)
     // Create the deleted/missing folders
     std::filesystem::create_directory(pluginsDirectory);
     std::filesystem::create_directory(patchersDirectory);
-    std::filesystem::create_directory(configDirectory);
-
-    qDebug() << pluginsInstallation.string();
-    qDebug() << pluginsDirectory.string();
 
     // Move 3 folders into BepInEx directory
-    const auto copyOption = std::filesystem::copy_options::recursive;
+    const auto copyOption = std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing;
     qDebug() << "Installing plugins...";
     std::filesystem::copy(pluginsInstallation, pluginsDirectory, copyOption);
     qDebug() << "Installed plugins.";
@@ -97,19 +94,20 @@ void Installer::installBepInEx(std::string &filesDirectory, std::string &gameDir
         throw GameNotFoundException();
     }
 
-    // Move the BepInEx files into the game files
-    std::filesystem::path bepinexInstallation(filesDirectory + "\\BepInExPack");
-    for (auto & entry : std::filesystem::directory_iterator(bepinexInstallation)) {
-        const auto copyOptions = std::filesystem::copy_options::recursive;
-        std::filesystem::copy(entry.path(), gameDirectory, copyOptions);
+    try {
+        // Move the BepInEx files into the game files
+        std::filesystem::path bepinexInstallation(filesDirectory + "\\BepInExPack");
+        //for (auto & entry : std::filesystem::directory_iterator(bepinexInstallation)) {
+        // Copy file into game directory
+        const auto copyOptions = std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing;
+        std::filesystem::copy(bepinexInstallation, gameDirectory, copyOptions);
+        //}
+    } catch (std::filesystem::filesystem_error & e) {
+        qDebug() << "Error: " << e.what() << '\n';
+        throw BepInExInstallationError();
+    } catch (...) {
+        throw BepInExInstallationError();
     }
-
-    // Run the game once
-    std::string exePath = gameDirectory + "\\Lethal Company.exe";
-    std::fopen(exePath.c_str(), "r");
-
-    // Close the game
-
 }
 
 // Uninstalls the modpack by removing the associated folders/files
@@ -120,4 +118,6 @@ void Installer::uninstall(std::string &gameDirectory) {
     }
 
     // Remove the BepInEx folder
+    std::filesystem::path bepinexDirectory(gameDirectory + "\\BepInExPack");
+    std::filesystem::remove_all(bepinexDirectory);
 }
