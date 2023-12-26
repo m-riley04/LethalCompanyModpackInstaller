@@ -13,28 +13,38 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
 
+# Overall Libraries Include/Linking
 include_directories(C:/vcpkg/installed/x64-windows/include)
 link_directories(C:/vcpkg/installed/x64-windows/lib)
 
-#include_directories(${CMAKE_HOME_DIRECTORY}/libs/)
+# Include zlib
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3/include)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3)
+
+# Include libzip
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1/include)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1)
+
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
+        src/main.cpp
+        src/mainwindow.cpp
+        src/mainwindow.h
         mainwindow.ui
+        src/installer.h src/installer.cpp
+        src/downloader.h src/downloader.cpp
+        src/manager.h src/manager.cpp
+        vcpkg.json
+        src/ziphandler.h src/ziphandler.cpp
+        src/appexceptions.h src/appexceptions.cpp
+        src/userdatahandler.h src/userdatahandler.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LethalCompanyModpackInstaller
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        installer.h installer.cpp
-        downloader.h downloader.cpp
-        manager.h manager.cpp
-        vcpkg.json
-        ziphandler.h ziphandler.cpp
-        appexceptions.h appexceptions.cpp
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LethalCompanyModpackInstaller APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
