@@ -73,4 +73,9 @@ CMakeLists.txt.user*
 *.exe
 
 # Unused Libs
-libgit2-1.7.1/
+libs/ *.h
+libs/ *.lib
+libs/libzip-1.10.1/include/zip.h
+libs/libzip-1.10.1/zip.lib
+libs/zlib-1.3/include/zlib.h
+libs/zlib-1.3/zlib.lib
