@@ -3,30 +3,34 @@
 #include <stdexcept>
 #include <QDebug>
 #include <QList>
-#include <filesystem>
+#include <QDir>
 
-std::vector<std::string> getKeys(std::map<std::string, QVariant> map) {
-    std::vector<std::string> keys;
+// Function that is able to return the keys of a map
+template <class X, class Y>
+std::vector<X> getKeys(std::map<X, Y> map) {
+    // Create return keys vector
+    std::vector<X> keys;
 
+    // Iterate through map for all keys
     for(auto const& imap: map) {
         keys.push_back(imap.first);
     }
 
+    // Return the keys
     return keys;
 }
 
 UserDataHandler::UserDataHandler() {
-    //load();
-    std::string path = std::filesystem::current_path().string();
-    path += "\\user_data";
+    // Set the filepath for the .ini save file
+    std::string path = QDir::currentPath().toStdString() + "\\user_data\\data.ini";
     QString qPath(path.c_str());
-    //settings.setPath(QSettings::defaultFormat(), QSettings::UserScope, "/user_data");
+    settings = new QSettings(qPath, QSettings::IniFormat);
 }
 
 void UserDataHandler::save() {
     qDebug() << "Beginning to save user data...";
-    settings.beginGroup("MainWindow");
-    for (std::string & key : getKeys(this->settingsMap)) {
+    settings->beginGroup("MainWindow");
+    /*for (std::string & key : getKeys(this->settingsMap)) {
         QVariant val;
         try {
             val = this->settingsMap.at(key);
@@ -36,33 +40,18 @@ void UserDataHandler::save() {
             return;
         }
 
-        settings.setValue(key, val);
-    }
-    settings.endGroup();
+        settings->setValue(key, val);
+    } */
+    settings->endGroup();
     qDebug() << "User data has finished saving.";
+
+    settings->sync();
 }
 
-void UserDataHandler::load() {
-    qDebug() << "Beginning to load user data...";
-    QList<QString> keys = settings.allKeys();
-
-    settings.beginGroup("MainWindow");
-    for (QString & key : keys) {
-
-        QVariant val = settings.value(key.toStdString());
-        if (!val.isNull()) {
-            this->settingsMap[key.toStdString()] = val;
-            qDebug() << "Loaded value '" << key << "' of value '" << val << "'.";
-        } else {
-            std::cerr << "ERROR: value is empty in key '" << key.toStdString() << "'";
-        }
-    }
-    settings.endGroup();
-}
-
+// Sets the value of a given setting name
 void UserDataHandler::setValue(std::string name, QVariant value) {
     if (name != "" && !value.isNull()) {
-        this->settingsMap[name] = value;
+        settings->setValue(name, value);
     } else if (value.isNull())  {
         throw std::invalid_argument("value cannot be null.");
     } else if (name == ""){
@@ -72,23 +61,27 @@ void UserDataHandler::setValue(std::string name, QVariant value) {
     }
 }
 
+// Gets the value of a given setting name
 QVariant UserDataHandler::getValue(std::string name) {
+    // Check if name is empty
     if (name != "") {
-        QVariant val = this->settings.value(name);
+        QVariant val = this->settings->value(name);
         return val;
     }
-    throw std::invalid_argument("valueName cannot be empty.");
+    throw std::invalid_argument("name cannot be empty.");
 }
 
+// Gets the value of a given setting name. If it doesn't exist, goes with the given default value.
 QVariant UserDataHandler::getValue(std::string name, QVariant defaultValue) {
+    // Check if name is empty
     if (name != "") {
         try {
-            QVariant val = this->settings.value(name, defaultValue);
+            QVariant val = this->settings->value(name, defaultValue);
             return val;
         } catch (std::out_of_range) {
             std::cerr << "Resorting to default value of '" << name << "'.\n";
             return defaultValue;
         }
     }
-    throw std::invalid_argument("valueName cannot be empty.");
+    throw std::invalid_argument("name cannot be empty.");
 }
