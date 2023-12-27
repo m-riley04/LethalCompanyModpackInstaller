@@ -2,16 +2,21 @@
 #include "./ui_mainwindow.h"
 #include "appexceptions.h"
 #include <QFileDialog>
+#include <QCoreApplication>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    // Set Core Preferences
+    QCoreApplication::setApplicationName("TheWolfPackInstaller");
+    QCoreApplication::setApplicationVersion("1.0.0");
+    QCoreApplication::setOrganizationName("Restless Medicine Studios");
+    QCoreApplication::setOrganizationDomain("restlessmedicine.com");
 
-    // Initialize Widgets
-    initialize_welcome();
-    ui->stack_installation->setCurrentIndex(0);
+    // Set up UI
+    ui->setupUi(this);
 
     // Connect Widgets
     connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_next);
@@ -19,11 +24,46 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
     connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
     connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
+
+    // Read user data
+    load();
+
+    // Initialize Widgets
+    initialize_welcome();
+    ui->stack_installation->setCurrentIndex(0);
+
+    if (!firstOpen) {
+        ui->stack_pages->setCurrentWidget(ui->page_home);
+    }
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::save() {
+    // Set all data values
+    dataHandler.setValue("pageCompleted", QVariant(pageCompleted));
+    dataHandler.setValue("modpackInstalled", QVariant(modpackInstalled));
+    dataHandler.setValue("firstOpen", QVariant(firstOpen));
+
+    // Save with data handler
+    dataHandler.save();
+}
+
+void MainWindow::load() {
+    // Load all variables
+    try {
+        pageCompleted       = dataHandler.getValue("pageCompleted", true).toBool();
+        modpackInstalled    = dataHandler.getValue("modpackInstalled", false).toBool();
+        firstOpen           = dataHandler.getValue("firstOpen", true).toBool();
+
+        dataHandler.load();
+    } catch (...) {
+        std::cerr << "Failed to load user data.\n";
+    }
 }
 
 void MainWindow::initialize_welcome() {
@@ -86,13 +126,17 @@ void MainWindow::initialize_working() {
     manager.install();
 
     // Successful
+    initialize_done();
     ui->stack_installation->setCurrentWidget(ui->page_done);
 }
 
 void MainWindow::initialize_done() {
     pageCompleted = true;
-    ui->btn_next->setEnabled(false);
-    ui->btn_back->setEnabled(true);
+    ui->btn_next->setEnabled(pageCompleted);
+    ui->btn_back->setEnabled(false);
+
+    ui->btn_next->setText("Finish");
+    connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_finish);
 }
 
 void MainWindow::initialize_error() {
@@ -171,6 +215,13 @@ void MainWindow::clicked_back() {
     }
 }
 
+void MainWindow::clicked_finish() {
+    ui->stack_pages->setCurrentWidget(ui->page_home);
+    firstOpen = false;
+    modpackInstalled = true;
+    save();
+}
+
 void MainWindow::clicked_browse() {
     std::string path = QFileDialog::getExistingDirectory().toStdString();
 
@@ -185,8 +236,6 @@ void MainWindow::clicked_browse() {
         return;
     }
     ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
-
-
 }
 
 void MainWindow::checked_eula() {
@@ -205,4 +254,9 @@ void MainWindow::typed_gameLocation() {
         return;
     }
     ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
+}
+
+//=== OVERRIDES
+void MainWindow::closeEvent(QCloseEvent *event) {
+    this->save();
 }

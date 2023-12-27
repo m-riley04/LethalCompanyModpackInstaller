@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "manager.h"
+#include "userdatahandler.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,6 +19,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    //===== User Data
+    void save();
+    void load();
+
     //===== Page Initializations
     void initialize_welcome();
     void initialize_eula();
@@ -30,6 +35,7 @@ public:
     void clicked_next();
     void clicked_back();
     void clicked_browse();
+    void clicked_finish();
 
     //===== Checkbox Commands
     void checked_eula();
@@ -37,9 +43,17 @@ public:
     //===== Textbox Commands
     void typed_gameLocation();
 
+protected:
+    //===== Overrides
+    void closeEvent(QCloseEvent *event);
+
 private:
     Ui::MainWindow *ui;
-    bool pageCompleted;
     Manager manager;
+    UserDataHandler dataHandler;
+
+    bool pageCompleted;
+    bool modpackInstalled;
+    bool firstOpen;
 };
 #endif // MAINWINDOW_H
