@@ -2,8 +2,9 @@
 #include <filesystem>
 #include "ziphandler.h"
 #include "appexceptions.h"
+#include "logger.h"
 
-//=== CONSTRUCTORS
+//=== CONSTRUCTORS/DESTRUCTORS
 Manager::Manager() {
     std::filesystem::path cwd(std::filesystem::current_path());
 
@@ -22,26 +23,32 @@ Manager::Manager() {
     this->userDataDirectory = userDataPath.string();
 }
 
+Manager::~Manager() {}
+
 //=== FUNCTIONALITIES
+// Grabs the latest release and downloads it to the filesystem
 void Manager::download() {
     // Get the latest release URL
-    qDebug() << "Grabbing latest release URL...";
+    Logger::log("Grabbing latest release URL...", logPath);
     std::string latestReleaseURL = this->fetchLatestRelease("m-riley04", "TheWolfPack");
-    qDebug() << "Latest Release: " << latestReleaseURL;
+    Logger::log("Latest Release: " + latestReleaseURL, logPath);
     std::string url = this->fetchReleaseDownload(latestReleaseURL);
-    qDebug() << "Latest Release Download: " << url;
+    Logger::log("Latest Release Download: " + url, logPath);
 
     // Download the zip file to cache directory
     std::string filename = "latest_release";
     if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\latest_release.zip"))) {
+        Logger::log("Beginning download...", logPath);
         this->downloader.download(url, cacheDirectory, filename);
+        Logger::log("Download finished.", logPath);
     }
 
     // Extract the zip file to the cache directory
-    qDebug() << "Extracting downloaded zip file...";
+    Logger::log("Extracting downloaded zip file...", logPath);
     std::string zip = cacheDirectory + "\\" + filename + ".zip";
     std::string output = cacheDirectory + "\\" + filename;
     ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
 }
 
 void Manager::downloadBepInEx() {
@@ -49,14 +56,17 @@ void Manager::downloadBepInEx() {
 
     // Download the bepinex files
     if (!std::filesystem::exists(std::filesystem::path(cacheDirectory + "\\BepInEx.zip"))) {
+        Logger::log("Beginning download...", logPath);
         this->downloader.download(bepinexURL, cacheDirectory, "BepInEx");
+        Logger::log("Download finished.", logPath);
     }
 
     // Extract the zip file to the cache directory
-    qDebug() << "Extracting downloaded zip file...";
+    Logger::log("Extracting downloaded zip file...", logPath);
     std::string zip = cacheDirectory + "\\BepInEx.zip";
     std::string output = cacheDirectory + "\\BepInEx";
     ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
 }
 
 void Manager::install() {
@@ -72,25 +82,34 @@ void Manager::installBepInEx() {
 // Updates the modpack
 void Manager::update() {
     // Download the latest version of the modpack
+    Logger::log("Downloading latest modpack version...", logPath);
     download();
+    Logger::log("Latest modpack version downloaded.", logPath);
 
     // Delete the current modpack files
+    Logger::log("Clearing current modpack files...", logPath);
     clearPlugins();
+    Logger::log("Cleared plugins.", logPath);
     clearConfig();
+    Logger::log("Cleared config.", logPath);
     clearPatchers();
+    Logger::log("Cleared patchers.", logPath);
+    Logger::log("Cleared plugins.", logPath);
 
     // Install the latest version of the modpack
+    Logger::log("Installing latest modpack version...", logPath);
     install();
+    Logger::log("Latest modpack version installed.", logPath);
 }
 
 // Enables the modpack
 void Manager::enable() {
-
+    Logger::log("The modpack has been enabled.", logPath);
 }
 
 // Disables the modpack temporarily
 void Manager::disable() {
-
+   Logger::log("The modpack has been disabled.", logPath);
 }
 
 // Clears out the plugins folder
@@ -131,9 +150,10 @@ bool Manager::isBepInExInstalled() {
     if (!std::filesystem::exists(path)) {
         throw GameNotFoundException();
     }
+    Logger::log("Searching through game directory...", logPath);
     for (auto & entry : std::filesystem::directory_iterator(path)) {
-        qDebug() << entry.path().filename().string();
         if (entry.path().filename().string() == "BepInEx") {
+            Logger::log("'BepInEx' folder found!", logPath);
             return true;
         }
     }
@@ -144,11 +164,13 @@ bool Manager::isBepInExInstalled() {
 //=== FINDERS
 // Finds the game's installation directory
 std::string Manager::locateGameLocation() {
+    Logger::log("Locating game directory...", logPath);
     // Check common drives
     std::string commonDrives[10] = {"C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
     std::filesystem::path gamePath;
     std::string gameName = "Lethal Company";
 
+    Logger::log("Iterating through common drives...", logPath);
     // Iterate through each drive
     for (auto & drive : commonDrives) {
 
@@ -157,10 +179,11 @@ std::string Manager::locateGameLocation() {
         gamePath /= pathStr;
         gamePath /= gameName;
 
-        qDebug() << gamePath.string();
+        Logger::log("Checking path: " + gamePath.string(), logPath);
 
         // Check if the Steam game exists
         if (std::filesystem::exists(gamePath)) {
+            Logger::log("Path exists!", logPath);
             gameDirectory = gamePath.string();
             gameDrive = drive;
             gameDrive += ":\\";
@@ -184,6 +207,7 @@ std::string Manager::fetchLatestRelease(std::string owner = "m-riley04", std::st
 
 // Returns a string of the lastest release's zipball download url
 std::string Manager::fetchReleaseDownload(std::string &url) {
+    Logger::log("Downloading JSON data from GitHub API...", logPath);
     QByteArray bytes = downloader.downloadJSONData(url);
     QJsonDocument json = QJsonDocument::fromJson(bytes);
     QJsonObject jsonObj = json.object();
@@ -208,4 +232,8 @@ void Manager::setVersion(std::string version) {
 
 void Manager::setGameDirectory(std::string directory) {
     this->gameDirectory = directory;
+}
+
+void Manager::setLogPath(std::string path) {
+    this->logPath = path;
 }

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "manager.h"
 #include "userdatahandler.h"
+#include "logger.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -51,6 +52,7 @@ private:
     Ui::MainWindow *ui;
     Manager manager;
     UserDataHandler dataHandler;
+    Logger * logger;
 
     bool pageCompleted;
     bool modpackInstalled;

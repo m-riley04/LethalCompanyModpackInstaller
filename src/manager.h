@@ -4,11 +4,13 @@
 #include "downloader.h"
 #include "installer.h"
 #include <zip.h>
+#include "logger.h"
 
 class Manager
 {
 public:
     Manager();
+    ~Manager();
 
     //=== FUNCTIONALITIES
     void download();
@@ -42,6 +44,7 @@ public:
     //=== SETTERS
     void setVersion(std::string version);
     void setGameDirectory(std::string directory);
+    void setLogPath(std::string path);
 
 private:
     Downloader downloader;
@@ -53,6 +56,7 @@ private:
 
     std::string cacheDirectory;
     std::string userDataDirectory;
+    std::string logPath;
 };
 
 #endif // MANAGER_H
