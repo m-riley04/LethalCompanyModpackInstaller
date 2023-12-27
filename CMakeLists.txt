@@ -18,19 +18,24 @@ include_directories(C:/vcpkg/installed/x64-windows/include)
 link_directories(C:/vcpkg/installed/x64-windows/lib)
 
 # Include zlib
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3/include)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3/include)
+#link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/zlib-1.3)
 
 # Include libzip
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1/include)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1/include)
+#link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1)
+
+set(CMAKE_AUTOUIC OFF)
+set (UI ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.ui)
+qt6_wrap_ui(UI_HEADERS ${UI})
+#add_executable(${LethalCompanyModpackInstaller}, )
 
 
 set(PROJECT_SOURCES
         src/main.cpp
         src/mainwindow.cpp
         src/mainwindow.h
-        mainwindow.ui
+        src/mainwindow.ui
         src/installer.h src/installer.cpp
         src/downloader.h src/downloader.cpp
         src/manager.h src/manager.cpp
