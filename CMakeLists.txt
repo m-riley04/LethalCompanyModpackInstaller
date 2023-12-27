@@ -25,10 +25,10 @@ link_directories(C:/vcpkg/installed/x64-windows/lib)
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1/include)
 #link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1)
 
-set(CMAKE_AUTOUIC OFF)
-set (UI ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.ui)
-qt6_wrap_ui(UI_HEADERS ${UI})
-#add_executable(${LethalCompanyModpackInstaller}, )
+#set(CMAKE_AUTOUIC OFF)
+#set(UI ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.ui)
+FILE(GLOB UIs *.ui)
+qt6_wrap_ui(UI_HEADERS ${UIs})
 
 
 set(PROJECT_SOURCES
