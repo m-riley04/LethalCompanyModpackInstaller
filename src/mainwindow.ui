@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="page_installation">
      <widget class="QFrame" name="frame_controls">
@@ -79,7 +79,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_welcome">
        <widget class="QFrame" name="frame_3">
@@ -540,13 +540,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </widget>
       </widget>
       <widget class="QWidget" name="page_error">
-       <widget class="QFrame" name="frame_6">
+       <widget class="QFrame" name="frame_error">
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>100</y>
+          <y>80</y>
           <width>751</width>
-          <height>231</height>
+          <height>311</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -632,14 +632,40 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QTextBrowser" name="textBrowser_3">
+        <widget class="QTextBrowser" name="text_error">
          <property name="geometry">
           <rect>
            <x>10</x>
            <y>140</y>
            <width>731</width>
-           <height>71</height>
+           <height>111</height>
           </rect>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_log">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>260</y>
+           <width>101</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Open Log</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_restart">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>260</y>
+           <width>131</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Restart Installation</string>
          </property>
         </widget>
        </widget>
@@ -676,7 +702,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </widget>
     </widget>
     <widget class="QWidget" name="page_home">
-     <widget class="QFrame" name="frame">
+     <widget class="QFrame" name="frame_homeHeader">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -705,54 +731,76 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </widget>
-     <widget class="QPushButton" name="btn_update">
+     <widget class="QStackedWidget" name="stack_home">
       <property name="geometry">
        <rect>
-        <x>660</x>
-        <y>530</y>
-        <width>131</width>
-        <height>41</height>
+        <x>0</x>
+        <y>80</y>
+        <width>671</width>
+        <height>431</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Update</string>
+      <property name="currentIndex">
+       <number>1</number>
       </property>
+      <widget class="QWidget" name="page_index"/>
+      <widget class="QWidget" name="page_settings">
+       <widget class="QPushButton" name="btn_reset">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>101</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
-     <widget class="QPushButton" name="btn_install">
+     <widget class="QFrame" name="frame_homeNavigation">
       <property name="geometry">
        <rect>
-        <x>540</x>
-        <y>530</y>
-        <width>111</width>
-        <height>41</height>
+        <x>670</x>
+        <y>80</y>
+        <width>121</width>
+        <height>501</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Install</string>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-     </widget>
-     <widget class="QTextBrowser" name="textBrowser">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
-        <width>361</width>
-        <height>281</height>
-       </rect>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
-     </widget>
-     <widget class="QLabel" name="label_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>361</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt;&quot;&gt;Changelog&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
+      <widget class="QPushButton" name="btn_settings">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Settings</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btn_update">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>460</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Check for Update</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
