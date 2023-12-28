@@ -40,6 +40,9 @@ public:
     void clicked_back();
     void clicked_browse();
     void clicked_finish();
+    void clicked_restart();
+    void clicked_update();
+    void clicked_reset();
 
     //===== Checkbox Commands
     void checked_eula();
@@ -55,6 +58,9 @@ public slots:
     void onModpackUnzipped();
     void onModpackInstalled();
     void onInstallationError();
+    void onUpdateAvailable();
+    void onUpdateUnavailable();
+    void onModpackUpdated();
 
 protected:
     //===== Overrides
