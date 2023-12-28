@@ -4,6 +4,7 @@
 #include "ziphandler.h"
 #include "appexceptions.h"
 #include "logger.h"
+#include <QtConcurrent/QtConcurrent>
 
 //=== CONSTRUCTORS/DESTRUCTORS
 Manager::Manager() {
@@ -117,7 +118,7 @@ void Manager::installBepInEx() {
 void Manager::update() {
     // Download the latest version of the modpack
     Logger::log("Downloading latest modpack version...", logPath);
-    doDownload();
+    download();
     Logger::log("Latest modpack version downloaded.", logPath);
 
     // Delete the current modpack files
@@ -132,7 +133,7 @@ void Manager::update() {
 
     // Install the latest version of the modpack
     Logger::log("Installing latest modpack version...", logPath);
-    doInstall();
+    install();
     Logger::log("Latest modpack version installed.", logPath);
 }
 
@@ -386,4 +387,5 @@ void Manager::doInstallBepInEx() {
 }
 void Manager::doUpdate() {
     update();
+    emit modpackUpdated();
 }
