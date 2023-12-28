@@ -390,6 +390,14 @@ void MainWindow::onModpackUpdated() {
     logger->log("Modpack updated successfully.");
 }
 
+void MainWindow::onUpdateAvailable() {
+
+}
+
+void MainWindow::onUpdateUnavailable() {
+
+}
+
 //=== OVERRIDES
 void MainWindow::closeEvent(QCloseEvent *event) {
     logger->log("=== USER CLOSED THE PROGRAM ===");
