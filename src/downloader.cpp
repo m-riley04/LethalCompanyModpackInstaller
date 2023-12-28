@@ -75,6 +75,8 @@ QByteArray &Downloader::downloadJSONData(std::string &url) {
     QEventLoop eventLoop;
     QAbstractSocket::connect(reply, &QNetworkReply::finished, this, &Downloader::downloadFinished);
     QAbstractSocket::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+    QAbstractSocket::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::deleteLater);
+
     eventLoop.exec();
 
     QByteArray data = reply->readAll();
