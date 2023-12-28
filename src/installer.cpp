@@ -3,21 +3,24 @@
 #include <QDebug>
 #include "appexceptions.h"
 
-//=== CONSTRUCTORS
+//=== CONSTRUCTORS/DESTRUCTORS
 Installer::Installer() {}
+Installer::Installer(std::string filesDirectory, std::string gameDirectory)
+    : filesDirectory(filesDirectory), gameDirectory(gameDirectory) {}
+Installer::~Installer() {}
 
 //=== FUNCTIONALITIES
 // Installs the modpack
 void Installer::install(std::string &filesDirectory, std::string &gameDirectory) {
     // Check if installation directory exists
     qDebug() << "Checking installation folder...";
-    if (!std::filesystem::exists(std::filesystem::path(filesDirectory))) {
+    if (!std::filesystem::exists(filesDirectory)) {
         throw InstallationFilesNotFoundException();
     }
 
     // Check if game directory exists
     qDebug() << "Checking game directory...";
-    if (!std::filesystem::exists(std::filesystem::path(gameDirectory))) {
+    if (!std::filesystem::exists(gameDirectory)) {
         throw GameNotFoundException();
     }
 
@@ -25,7 +28,7 @@ void Installer::install(std::string &filesDirectory, std::string &gameDirectory)
     qDebug() << "Checking for BepInEx...";
     std::string bepinexDirectory = gameDirectory + "\\BepInEx";
     std::filesystem::path bepinexPath(bepinexDirectory);
-    if (!std::filesystem::exists(std::filesystem::path(bepinexPath))) {
+    if (!std::filesystem::exists(bepinexPath)) {
         throw BepInExNotInstalledException();
     }
 
@@ -108,6 +111,7 @@ void Installer::installBepInEx(std::string &filesDirectory, std::string &gameDir
     } catch (...) {
         throw BepInExInstallationError();
     }
+
 }
 
 // Uninstalls the modpack by removing the associated folders/files
@@ -120,4 +124,26 @@ void Installer::uninstall(std::string &gameDirectory) {
     // Remove the BepInEx folder
     std::filesystem::path bepinexDirectory(gameDirectory + "\\BepInExPack");
     std::filesystem::remove_all(bepinexDirectory);
+}
+
+void Installer::setFilesDirectory(std::string directory) {
+    filesDirectory = directory;
+}
+
+void Installer::setGameDirectory(std::string directory) {
+    gameDirectory = directory;
+}
+
+//=== SLOTS
+void Installer::doInstall() {
+    install(filesDirectory, gameDirectory);
+    emit installFinished();
+}
+void Installer::doInstallBepInEx() {
+    installBepInEx(filesDirectory, gameDirectory);
+    emit installFinished();
+}
+void Installer::doUninstall() {
+    uninstall(gameDirectory);
+    emit uninstallFinished();
 }

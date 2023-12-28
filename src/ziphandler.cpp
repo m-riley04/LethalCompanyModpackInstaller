@@ -7,9 +7,9 @@
 
 ZipHandler::ZipHandler() {}
 
-int ZipHandler::extract(std::string &filePath, std::string &targetPath) {
+int ZipHandler::extract(std::string filePath, std::string targetPath) {
     int err = 0;
-    zip* za = zip_open(filePath.c_str(), 0, &err);
+    zip* za = zip_open(filePath.c_str(), ZIP_CREATE, &err);
     if (za == nullptr) {
         std::cerr << "Error opening archive: " << err << "\n";
         return -1;

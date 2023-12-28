@@ -1,15 +1,17 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include <QObject>
 #include "downloader.h"
 #include "installer.h"
 #include <zip.h>
-#include "logger.h"
 
-class Manager
+class Manager : public QObject
 {
+    Q_OBJECT
 public:
     Manager();
+    Manager(Manager &m);
     ~Manager();
 
     //=== FUNCTIONALITIES
@@ -45,6 +47,25 @@ public:
     void setVersion(std::string version);
     void setGameDirectory(std::string directory);
     void setLogPath(std::string path);
+
+signals:
+    void bepInExDownloaded();
+    void bepInExInstalled();
+    void bepInExUnzipped();
+    void modpackDownloaded();
+    void modpackInstalled();
+    void modpackUpdated();
+    void modpackUnzipped();
+    void errorOccurred(QString error);
+
+public slots:
+    void doDownload();
+    void doDownloadBepInEx();
+    void doUnzip();
+    void doUnzipBepInEx();
+    void doInstall();
+    void doInstallBepInEx();
+    void doUpdate();
 
 private:
     Downloader downloader;

@@ -4,12 +4,16 @@
 
 Downloader::Downloader() {}
 
+Downloader::Downloader(std::string url, std::string output, std::string name)
+    : url(url), output(output), name(name)
+{}
+
 Downloader::~Downloader() {}
 
 // Downloads a url to a given output path
 void Downloader::download(std::string &url, std::string &output, std::string name = "latest_release") {
-    qDebug() << "Preparing to download...";
     qDebug() << "Chosen URL: '" << url << "'";
+    qDebug() << "Preparing to download...";
 
     // Download the byte data
     QByteArray data = this->downloadByteData(url);
@@ -17,6 +21,9 @@ void Downloader::download(std::string &url, std::string &output, std::string nam
 
     // Save the byte data to the disk
     this->saveToDisk(data, name, output);
+
+    // Emit completed signal
+    emit downloadFinished();
 }
 
 // Saves given byte data to a given filename and path. Returns true if writing is successful.
@@ -44,8 +51,10 @@ bool Downloader::saveToDisk(QByteArray &data, std::string &filename, std::string
 QByteArray &Downloader::downloadByteData(std::string &url) {
     QUrl _url(url.c_str());
     QNetworkRequest request(_url);
+
     QNetworkReply * reply = webController.get(request);
     QEventLoop eventLoop;
+    QAbstractSocket::connect(reply, &QNetworkReply::finished, this, &Downloader::downloadFinished);
     QAbstractSocket::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
 
@@ -64,6 +73,7 @@ QByteArray &Downloader::downloadJSONData(std::string &url) {
 
     QNetworkReply * reply = webController.get(request);
     QEventLoop eventLoop;
+    QAbstractSocket::connect(reply, &QNetworkReply::finished, this, &Downloader::downloadFinished);
     QAbstractSocket::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
     eventLoop.exec();
 
@@ -75,4 +85,7 @@ QByteArray &Downloader::downloadJSONData(std::string &url) {
     return this->data;
 }
 
-
+//=== SLOTS
+void Downloader::doDownload() {
+    download(url, output, name);
+}

@@ -5,6 +5,8 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <iostream>
+#include <QThread>
+#include <QtConcurrent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -77,6 +79,7 @@ void MainWindow::load() {
     }
 }
 
+//===== PAGE INITIALIZATIONS
 void MainWindow::initialize_welcome() {
     pageCompleted = true;
     ui->btn_next->setEnabled(pageCompleted);
@@ -118,12 +121,15 @@ void MainWindow::initialize_configuration() {
 
     logger->log("Attempting to find BepInEx installation...");
     try {
-        // Find BepInEx installation
-        manager.isBepInExInstalled();
-        ui->label_bepinexFound->setText(QString("Yes"));
-        logger->log("BepInEx installation found.");
-
-    } catch (BepInExNotInstalledException e) {
+        // Find if BepInEx is installed
+        if (manager.isBepInExInstalled()) {
+            ui->label_bepinexFound->setText(QString("Yes"));
+            logger->log("BepInEx installation found.");
+        } else {
+            ui->label_bepinexFound->setText(QString("No"));
+            logger->log("BepInEx installation NOT found.");
+        }
+    } catch (GameNotFoundException e) {
         ui->label_bepinexFound->setText(QString("No"));
         logger->log("BepInEx installation NOT found.");
     }
@@ -138,35 +144,30 @@ void MainWindow::initialize_working() {
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
 
+    // Configure console
+    //ui->text_console->setUpdatesEnabled(true);
+    //ui->text_console->setSource(QUrl(QDir::currentPath() + "\\log.txt"));
+
+    // Connect installation and download signals/slots
+    connect(&manager, &Manager::bepInExDownloaded, this, &MainWindow::onBepInExDownloaded);
+    connect(&manager, &Manager::bepInExUnzipped, this, &MainWindow::onBepInExUnzipped);
+    connect(&manager, &Manager::bepInExInstalled, this, &MainWindow::onBepInExInstalled);
+    connect(&manager, &Manager::modpackDownloaded, this, &MainWindow::onModpackDownloaded);
+    connect(&manager, &Manager::modpackUnzipped, this, &MainWindow::onModpackUnzipped);
+    connect(&manager, &Manager::modpackInstalled, this, &MainWindow::onModpackInstalled);
 
     try {
         // Check if BepInEx is insalled
         if (!manager.isBepInExInstalled()) {
-
             // Download BepInEx
+            ui->label_progress->setText("Downloading BepInEx...");
             logger->log("Downloading BepInEx...");
-            manager.downloadBepInEx();
-            logger->log("BepInEx has been downloaded.");
-
-            // Install BepInEx
-            logger->log("Installing BepInEx...");
-            manager.installBepInEx();
-            logger->log("BepInEx has been installed.");
+            manager.doDownloadBepInEx();
+        } else {
+            // Download modpack
+            ui->label_progress->setText("Downloading modpack...");
+            manager.doDownload();
         }
-
-        // Start download process
-        logger->log("Downloading modpack...");
-        manager.download();
-        logger->log("Modpack downloaded.");
-
-        // Start installation process
-        logger->log("Installing modpack...");
-        manager.install();
-        logger->log("Modpack installed.");
-
-        // Successful installation
-        initialize_done();
-        ui->stack_installation->setCurrentWidget(ui->page_done);
 
     } catch (...) {
         logger->log("ERROR: The installer has encountered an error and has canceled the installation.");
@@ -176,7 +177,6 @@ void MainWindow::initialize_working() {
         ui->stack_installation->setCurrentWidget(ui->page_error);
     }
 
-    logger->log("--- INSTALLATION PHASE ENDED ---");
 }
 
 void MainWindow::initialize_done() {
@@ -196,6 +196,12 @@ void MainWindow::initialize_error() {
     ui->btn_back->setEnabled(false);
 }
 
+//===== UPDATES
+void MainWindow::update_console() {
+
+}
+
+//===== WIDGET COMMANDS
 void MainWindow::clicked_next() {
     int currentIndex = ui->stack_installation->currentIndex();
     int nextIndex = currentIndex + 1;
@@ -221,9 +227,6 @@ void MainWindow::clicked_next() {
         break;
     case (4):
         initialize_done();
-        break;
-    case (5):
-        initialize_error();
         break;
     default:
         initialize_welcome();
@@ -315,6 +318,54 @@ void MainWindow::typed_gameLocation() {
         return;
     }
     ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
+}
+
+//=== SLOTS
+void MainWindow::onBepInExDownloaded() {
+    logger->log("BepInEx downloaded successfully.");
+
+    // Move on to unzipping
+    ui->label_progress->setText("Unzipping BepInEx...");
+    manager.doUnzipBepInEx();
+}
+void MainWindow::onBepInExUnzipped() {
+    logger->log("BepInEx unzipped successfully.");
+
+    // Move on to unzipping
+    ui->label_progress->setText("Installing BepInEx...");
+    manager.doInstallBepInEx();
+}
+void MainWindow::onBepInExInstalled() {
+    logger->log("BepInEx installed successfully.");
+
+    // Move on to the modpack download
+    ui->label_progress->setText("Downloading modpack...");
+    manager.doDownload();
+}
+void MainWindow::onModpackDownloaded() {
+    logger->log("Modpack downloaded successfully.");
+
+    // Move on to installation
+    ui->label_progress->setText("Unzipping modpack...");
+    manager.doUnzip();
+}
+void MainWindow::onModpackUnzipped() {
+    logger->log("Modpack unzipped successfully.");
+
+    // Move on to installation
+    ui->label_progress->setText("Installing modpack...");
+    manager.doInstall();
+}
+void MainWindow::onModpackInstalled() {
+    logger->log("--- INSTALLATION PHASE ENDED ---");
+    logger->log("Modpack installed successfully.");
+
+    initialize_done();
+    ui->stack_installation->setCurrentWidget(ui->page_done);
+}
+void MainWindow::onInstallationError() {
+    logger->log("=== INSTALLATION ERROR ===");
+    ui->stack_installation->setCurrentWidget(ui->page_error);
 }
 
 //=== OVERRIDES

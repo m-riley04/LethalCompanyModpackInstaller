@@ -32,6 +32,9 @@ public:
     void initialize_done();
     void initialize_error();
 
+    //===== Updates
+    void update_console();
+
     //===== Button Commands
     void clicked_next();
     void clicked_back();
@@ -43,6 +46,15 @@ public:
 
     //===== Textbox Commands
     void typed_gameLocation();
+
+public slots:
+    void onBepInExDownloaded();
+    void onBepInExUnzipped();
+    void onBepInExInstalled();
+    void onModpackDownloaded();
+    void onModpackUnzipped();
+    void onModpackInstalled();
+    void onInstallationError();
 
 protected:
     //===== Overrides
