@@ -34,6 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
     connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
     connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
+    connect(ui->btn_update, &QPushButton::clicked, this, &MainWindow::clicked_update);
+    connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
+    connect(ui->btn_reset, &QPushButton::clicked, this, &MainWindow::clicked_reset);
 
     // Read user data
     logger->log("Reading user data...");
@@ -181,8 +184,12 @@ void MainWindow::initialize_working() {
 
 void MainWindow::initialize_done() {
     pageCompleted = true;
+    firstOpen = false;
+    modpackInstalled = true;
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
+
+    save();
 
     ui->btn_next->setText("Finish");
     connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_finish);
@@ -302,6 +309,18 @@ void MainWindow::clicked_browse() {
     ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
 }
 
+void MainWindow::clicked_update() {
+    manager.doUpdate();
+}
+
+void MainWindow::clicked_restart() {
+
+}
+
+void MainWindow::clicked_reset() {
+
+}
+
 void MainWindow::checked_eula() {
     pageCompleted = !pageCompleted;
     ui->btn_next->setEnabled(pageCompleted);
@@ -366,6 +385,9 @@ void MainWindow::onModpackInstalled() {
 void MainWindow::onInstallationError() {
     logger->log("=== INSTALLATION ERROR ===");
     ui->stack_installation->setCurrentWidget(ui->page_error);
+}
+void MainWindow::onModpackUpdated() {
+    logger->log("Modpack updated successfully.");
 }
 
 //=== OVERRIDES
