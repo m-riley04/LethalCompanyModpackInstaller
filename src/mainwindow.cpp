@@ -4,9 +4,30 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDir>
-#include <iostream>
 #include <QThread>
 #include <QtConcurrent>
+#include <QMessageBox>
+
+// Reads a stylesheet from a given path and returns the raw text from the file
+QString readStylesheet(const QString &path) {
+    // Open the qss file
+    QFile file(path);
+    qDebug() << path;
+
+    // Check if the file was opened
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "ERROR: qss stylesheet was not loaded.";
+        return "";
+    }
+
+    // Save to text;
+    QString text(file.readAll().toStdString().c_str());
+
+    // Close the file
+    file.close();
+
+    return text;
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,6 +43,11 @@ MainWindow::MainWindow(QWidget *parent)
     QCoreApplication::setApplicationVersion("1.0.0");
     QCoreApplication::setOrganizationName("Restless Medicine Studios");
     QCoreApplication::setOrganizationDomain("restlessmedicine.com");
+
+    // Set Stylesheet
+    QString stylesheetName = "stylesheet";
+    const QString stylesheetPath = QDir::currentPath() + "\\" + stylesheetName + ".qss";
+    setStyleSheet(readStylesheet(stylesheetPath));
 
     // Set up UI
     logger->log("Setting up UI...");
@@ -45,9 +71,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Initialize Widgets
     initialize_welcome();
     ui->stack_installation->setCurrentIndex(0);
+    ui->stack_pages->setCurrentWidget(ui->page_installation);
 
     if (!firstOpen) {
         logger->log("Returning user detected: skipping first-time installation.");
+        ui->stack_installation->setCurrentWidget(ui->page_welcome);
         ui->stack_pages->setCurrentWidget(ui->page_home);
     }
 

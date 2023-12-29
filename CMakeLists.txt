@@ -25,32 +25,39 @@ link_directories(C:/vcpkg/installed/x64-windows/lib)
 #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1/include)
 #link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/libzip-1.10.1)
 
-#set(CMAKE_AUTOUIC OFF)
-#set(UI ${CMAKE_CURRENT_LIST_DIR}/src/mainwindow.ui)
+# Set UI build headers
 FILE(GLOB UIs *.ui)
 qt6_wrap_ui(UI_HEADERS ${UIs})
 
-
+# Project Sources
 set(PROJECT_SOURCES
         src/main.cpp
-        src/mainwindow.cpp
-        src/mainwindow.h
-        src/mainwindow.ui
+
+        # Implementation
+        src/mainwindow.h src/mainwindow.cpp
         src/installer.h src/installer.cpp
         src/downloader.h src/downloader.cpp
         src/manager.h src/manager.cpp
-        vcpkg.json
         src/ziphandler.h src/ziphandler.cpp
         src/appexceptions.h src/appexceptions.cpp
         src/userdatahandler.h src/userdatahandler.cpp
+        src/logger.h src/logger.cpp
+
+        # UI
+        src/mainwindow.ui
+        src/stylesheets/stylesheet.qss
+
+        # Other
+        vcpkg.json
 )
+
+# Move Stylesheet To Binary Folder
+configure_file(src/stylesheets/stylesheet.qss ${CMAKE_CURRENT_BINARY_DIR}/stylesheet.qss COPYONLY)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(LethalCompanyModpackInstaller
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        src/logger.h src/logger.cpp
-
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LethalCompanyModpackInstaller APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
