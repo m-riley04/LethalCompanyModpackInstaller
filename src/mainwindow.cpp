@@ -243,8 +243,33 @@ void MainWindow::load() {
         pageCompleted       = dataHandler.getValue("pageCompleted", true).toBool();
         modpackInstalled    = dataHandler.getValue("modpackInstalled", false).toBool();
         firstOpen           = dataHandler.getValue("firstOpen", true).toBool();
+void MainWindow::reset() {
+    logger->log("Resetting user data...");
+    try {
+        pageCompleted = true;
+        modpackInstalled = false;
+        firstOpen = true;
+        releaseUrl = "";
+        githubUrl = "github.com";
+        changelog = "";
+        modpackVersion = "1.0.0";
+        gameDirectory = "";
+
+        dataHandler.setValue("pageCompleted", pageCompleted);
+        dataHandler.setValue("modpackInstalled", modpackInstalled);
+        dataHandler.setValue("firstOpen", firstOpen);
+        dataHandler.setValue("releaseUrl", QVariant(releaseUrl.c_str()));
+        dataHandler.setValue("githubUrl", QVariant(githubUrl.c_str()));
+        dataHandler.setValue("changelog", QVariant(changelog.c_str()));
+        dataHandler.setValue("modpackVersion", QVariant(modpackVersion.c_str()));
+        dataHandler.setValue("gameDirectory", QVariant(gameDirectory.c_str()));
+
+        save();
     } catch (...) {
-        std::cerr << "Failed to load user data.\n";
+        logger->log("ERROR: Failed to reset user data");
+    }
+}
+
     }
 }
 
@@ -484,7 +509,40 @@ void MainWindow::clicked_restart() {
 }
 
 void MainWindow::clicked_reset() {
+    logger->log("Reset confirmation box opened.");
 
+    // Confirm if they want to reset
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Confirm", "Are you sure you would like to reset? This will uninstall the modpack, clear the app cache/user data, and restart the installation process.",
+                                                       QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        logger->log("User has chosen to reset the application.");
+
+        // Clear out the cache
+        clearCache();
+
+        // Uninstall the current installation
+        uninstall();
+
+        // Reset the user data
+        reset();
+
+        // Set initial pages
+        ui->stack_pages->setCurrentWidget(ui->page_installation);
+        ui->stack_installation->setCurrentWidget(ui->page_welcome);
+        ui->stack_home->setCurrentWidget(ui->page_index);
+        ui->stack_installation->setCurrentIndex(0);
+    } else {
+        logger->log("User has chosen NOT to reset the application.");
+    }
+}
+
+void MainWindow::clicked_clearCache() {
+    clearCache();
+}
+
+void MainWindow::clicked_github() {
+    QDesktopServices::openUrl(QUrl(githubUrl.c_str()));
 }
 
 void MainWindow::checked_eula() {

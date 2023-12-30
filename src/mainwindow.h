@@ -23,6 +23,7 @@ public:
     //===== User Data/Functionalities
     void save();
     void load();
+    void reset();
 
     //=== App Initializations
     void initialize_core();
