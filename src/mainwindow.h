@@ -25,6 +25,7 @@ public:
     void load();
     void reset();
     void clearCache();
+    void uninstall();
 
     //=== App Initializations
     void initialize_core();
