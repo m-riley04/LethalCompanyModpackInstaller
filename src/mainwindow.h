@@ -52,7 +52,10 @@ public:
     void clicked_finish();
     void clicked_restart();
     void clicked_update();
+    void clicked_settings();
     void clicked_reset();
+    void clicked_clearCache();
+    void clicked_github();
 
     //===== Checkbox Commands
     void checked_eula();
@@ -85,5 +88,10 @@ private:
     bool pageCompleted;
     bool modpackInstalled;
     bool firstOpen;
+    std::string releaseUrl;
+    std::string githubUrl;
+    std::string changelog;
+    std::string modpackVersion;
+    std::string gameDirectory;
 };
 #endif // MAINWINDOW_H

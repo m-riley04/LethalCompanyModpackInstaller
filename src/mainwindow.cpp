@@ -160,7 +160,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->stack_installation->setCurrentWidget(ui->page_welcome);
         ui->stack_pages->setCurrentWidget(ui->page_home);
     }
-
 }
 
 MainWindow::~MainWindow()
@@ -331,6 +330,7 @@ void MainWindow::initialize_welcome() {
     pageCompleted = true;
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
+    ui->btn_next->setText("Next");
     logger->log("Installer 'Welcome' page initialized.");
 }
 
@@ -338,6 +338,7 @@ void MainWindow::initialize_eula() {
     pageCompleted = ui->checkbox_eula->isChecked();
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(true);
+    ui->btn_next->setText("Next");
     logger->log("Installer 'EULA' page initialized.");
     logger->log("Awaiting EULA confirnmation...");
 }
@@ -345,14 +346,15 @@ void MainWindow::initialize_eula() {
 void MainWindow::initialize_configuration() {
     logger->log("Initializing installer page 'Configuration'...");
     pageCompleted = true;
+    ui->btn_next->setText("Install");
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(true);
-
 
     logger->log("Attempting to find the game installation...");
     try {
         // Find the game installation
-        ui->line_lethalCompanyLocation->setText(QString(manager.locateGameLocation().c_str()));
+        gameDirectory = manager.locateGameLocation();
+        ui->line_lethalCompanyLocation->setText(QString(gameDirectory.c_str()));
         ui->label_found->setText(QString("Yes"));
 
         // Find the space available
@@ -388,6 +390,7 @@ void MainWindow::initialize_configuration() {
 void MainWindow::initialize_working() {
     logger->log("--- BEGINNING INSTALLATION PHASE ---");
     pageCompleted = false;
+    ui->btn_next->setText("Next");
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
 
@@ -411,7 +414,6 @@ void MainWindow::initialize_working() {
         ui->label_progress->setText("Downloading modpack...");
         manager.doDownload();
     }
-
 }
 
 void MainWindow::initialize_done() {
@@ -421,10 +423,12 @@ void MainWindow::initialize_done() {
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
 
+    // Save the user data
     save();
 
-    ui->btn_next->setText("Finish");
+    // Set the button text
     connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_finish);
+    ui->btn_next->setText("Finish");
     logger->log("Installer 'Done' page initialized.");
 }
 
@@ -614,7 +618,17 @@ void MainWindow::clicked_settings() {
 }
 
 void MainWindow::clicked_restart() {
+    logger->log("=== INSTALLATION RESTARTING ===");
 
+    // Clear/Reset all made changes
+    clearCache();
+    reset();
+    uninstall();
+
+    // Reset the pages
+    ui->stack_pages->setCurrentWidget(ui->page_installation);
+    ui->stack_installation->setCurrentWidget(ui->page_welcome);
+    ui->stack_home->setCurrentWidget(ui->page_index);
 }
 
 void MainWindow::clicked_reset() {
@@ -662,7 +676,8 @@ void MainWindow::checked_eula() {
 void MainWindow::typed_gameLocation() {
     // Check if the typed path exists
     if (std::filesystem::exists(ui->line_lethalCompanyLocation->text().toStdString())) {
-        manager.setGameDirectory(ui->line_lethalCompanyLocation->text().toStdString());
+        gameDirectory = ui->line_lethalCompanyLocation->text().toStdString();
+        manager.setGameDirectory(gameDirectory);
         ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
         // Find the space available
         std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
@@ -712,7 +727,9 @@ void MainWindow::onModpackInstalled() {
     logger->log("--- INSTALLATION PHASE ENDED ---");
     logger->log("Modpack installed successfully.");
 
+    // Initialize the done and home pages
     initialize_done();
+    initialize_home();
     ui->stack_installation->setCurrentWidget(ui->page_done);
 }
 void MainWindow::onInstallationError() {
