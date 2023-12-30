@@ -26,6 +26,7 @@ public:
 
 signals:
     void installFinished();
+    void installBepInExFinished();
     void uninstallFinished();
     void installError();
     void uninstallError();
@@ -34,6 +35,9 @@ public slots:
     void doInstall();
     void doInstallBepInEx();
     void doUninstall();
+    void onInstallFinished();
+    void onInstallBepInExFinished();
+    void onUninstallFinished();
 
 private:
     int installSize;

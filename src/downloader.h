@@ -21,18 +21,18 @@ public:
     ~Downloader();
 
     void download(std::string &url, std::string &output, std::string name);
-    bool saveToDisk(QByteArray &data, std::string &filename, std::string &path);
     QByteArray &downloadByteData(std::string &url);
     QByteArray &downloadJSONData(std::string &url);
 
     QNetworkAccessManager& getWebController();
 
 signals:
-    void downloadFinished();
+    void downloadFinished(const QByteArray& data);
     void downloadProgress(int bytesReceived, int bytesTotal);
     void downloadError(QString errorString);
 
 public slots:
+    void onDownloadFinished(QNetworkReply * reply);
     void doDownload();
 
 private:
@@ -41,6 +41,8 @@ private:
     std::string url;
     std::string output;
     std::string name;
+
+    bool saveToDisk(QByteArray &data, std::string &filename, std::string &path);
 };
 
 #endif // DOWNLOADER_H

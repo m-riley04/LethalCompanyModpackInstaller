@@ -122,28 +122,42 @@ void Installer::uninstall(std::string &gameDirectory) {
     }
 
     // Remove the BepInEx folder
-    std::filesystem::path bepinexDirectory(gameDirectory + "\\BepInExPack");
+    std::filesystem::path bepinexDirectory(gameDirectory + "\\BepInEx");
     std::filesystem::remove_all(bepinexDirectory);
 }
 
+//=== SLOTS
+void Installer::doInstall() {
+    install(filesDirectory, gameDirectory);
+    onInstallFinished();
+}
+void Installer::doInstallBepInEx() {
+    installBepInEx(filesDirectory, gameDirectory);
+    onInstallBepInExFinished();
+}
+void Installer::doUninstall() {
+    uninstall(gameDirectory);
+    onUninstallFinished();
+}
+void Installer::onInstallFinished() {
+
+
+    emit installFinished();
+}
+void Installer::onInstallBepInExFinished() {
+
+    emit installBepInExFinished();
+}
+void Installer::onUninstallFinished() {
+
+
+    emit uninstallFinished();
+}
+//=== GETTERS/SETTERS
 void Installer::setFilesDirectory(std::string directory) {
     filesDirectory = directory;
 }
 
 void Installer::setGameDirectory(std::string directory) {
     gameDirectory = directory;
-}
-
-//=== SLOTS
-void Installer::doInstall() {
-    install(filesDirectory, gameDirectory);
-    emit installFinished();
-}
-void Installer::doInstallBepInEx() {
-    installBepInEx(filesDirectory, gameDirectory);
-    emit installFinished();
-}
-void Installer::doUninstall() {
-    uninstall(gameDirectory);
-    emit uninstallFinished();
 }

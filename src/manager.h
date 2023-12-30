@@ -2,6 +2,7 @@
 #define MANAGER_H
 
 #include <QObject>
+#include <QThread>
 #include "downloader.h"
 #include "installer.h"
 #include <zip.h>
@@ -9,6 +10,7 @@
 class Manager : public QObject
 {
     Q_OBJECT
+    QThread thread;
 public:
     Manager();
     Manager(Manager &m);
@@ -17,6 +19,8 @@ public:
     //=== FUNCTIONALITIES
     void download();
     void downloadBepInEx();
+    void unzip();
+    void unzipBepInEx();
     void install();
     void installBepInEx();
     void update();
@@ -30,8 +34,11 @@ public:
     std::string locateGameLocation();
 
     //=== URL FETCHERS
-    std::string fetchLatestRelease(std::string owner, std::string repo);
+    std::string fetchLatestReleaseURL(std::string owner = "m-riley04", std::string repo = "TheWolfPack" );
+    QJsonDocument fetchLatestRelease(std::string &url);
     std::string fetchReleaseDownload(std::string &url);
+    std::string fetchLatestVersion(std::string &url);
+    std::string fetchReleaseChangelog(std::string &url);
 
     //=== STATUS
     bool isUpdated();
@@ -42,6 +49,7 @@ public:
     std::string getVersion();
     Downloader &getDownloader();
     Installer &getInstaller();
+    QJsonDocument& getRelease();
 
     //=== SETTERS
     void setVersion(std::string version);
@@ -56,25 +64,42 @@ signals:
     void modpackInstalled();
     void modpackUpdated();
     void modpackUnzipped();
+    void upToDate();
+    void outOfDate();
     void errorOccurred(QString error);
 
 public slots:
     void doDownload();
-    void doDownloadBepInEx();
     void doUnzip();
-    void doUnzipBepInEx();
     void doInstall();
+    void doUninstall();
+
+    void doDownloadBepInEx();
+    void doUnzipBepInEx();
     void doInstallBepInEx();
+
+    void onModpackDownloaded();
+    void onModpackUnzipped();
+    void onModpackInstalled();
+
+    void onBepInExDownloaded();
+    void onBepInExUnzipped();
+    void onBepInExInstalled();
+
+    // Updating
     void doUpdate();
+    void onModpackUpdated();
 
 private:
     Downloader downloader;
     Installer installer;
 
+    QJsonDocument release;
     std::string version;
     std::string gameDirectory;
     std::string gameDrive;
 
+    std::string packUrl;
     std::string cacheDirectory;
     std::string userDataDirectory;
     std::string logPath;

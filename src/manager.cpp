@@ -1,6 +1,6 @@
 #include "manager.h"
 #include <filesystem>
-#include "qthread.h"
+#include <QThread>
 #include "ziphandler.h"
 #include "appexceptions.h"
 #include "logger.h"
@@ -11,14 +11,16 @@ Manager::Manager() {
     std::filesystem::path cwd(std::filesystem::current_path());
 
     // Check if cache directory exists
-    std::filesystem::path cachePath = cwd; cachePath /= "cache";
+    std::filesystem::path cachePath = cwd;
+    cachePath /= "cache";
     if (!std::filesystem::exists(cachePath)) {
         std::filesystem::create_directory(cachePath);
     }
     this->cacheDirectory = cachePath.string();
 
     // Check if user_data directory exists
-    std::filesystem::path userDataPath = cwd; userDataPath /= "user_data";
+    std::filesystem::path userDataPath = cwd;
+    userDataPath /= "user_data";
     if (!std::filesystem::exists(userDataPath)) {
         std::filesystem::create_directory(userDataPath);
     }
@@ -27,25 +29,29 @@ Manager::Manager() {
 
 // Copy Constructor
 Manager::Manager(Manager &m) {
-    //downloader          = m.downloader;
-    //installer           = m.installer;
-
     version             = m.version;
     gameDirectory       = m.gameDirectory;
     gameDrive           = m.gameDrive;
     cacheDirectory      = m.cacheDirectory;
     userDataDirectory   = m.userDataDirectory;
     logPath             = m.logPath;
+
+    // Inhereit from main constructor
+    Manager();
 }
 
-Manager::~Manager() {}
+Manager::~Manager() {
+    // Exit the thread safely
+    thread.quit();
+    thread.wait();
+}
 
 //=== FUNCTIONALITIES
 // Grabs the latest release and downloads it to the filesystem
 void Manager::download() {
     // Get the latest release URL
     Logger::log("Grabbing latest release URL...", logPath);
-    std::string latestReleaseURL = this->fetchLatestRelease("m-riley04", "TheWolfPack");
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
     Logger::log("Latest Release: " + latestReleaseURL, logPath);
     std::string url = this->fetchReleaseDownload(latestReleaseURL);
     Logger::log("Latest Release Download: " + url, logPath);
@@ -90,33 +96,13 @@ void Manager::unzipBepInEx() {
 }
 
 void Manager::install() {
-    QThread * thread = new QThread;
-    Installer * worker = new Installer();
     std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
-    worker->setFilesDirectory(installationFilesDirectory);
-    worker->setGameDirectory(gameDirectory);
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Installer::doInstall);
-    connect(worker, &Installer::installFinished, this, &Manager::modpackInstalled);
-    connect(worker, &Installer::installFinished, thread, &QThread::quit);
-    connect(worker, &Installer::installFinished, worker, &Installer::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-    thread->start();
+    installer.install(installationFilesDirectory, gameDirectory);
 }
 
 void Manager::installBepInEx() {
     std::string installationFilesDirectory = cacheDirectory + "\\BepInEx";
-    QThread * thread = new QThread;
-    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Installer::doInstallBepInEx);
-    connect(worker, &Installer::installFinished, this, &Manager::bepInExInstalled);
-    connect(worker, &Installer::installFinished, thread, &QThread::quit);
-    connect(worker, &Installer::installFinished, worker, &Installer::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-    thread->start();
+    installer.install(installationFilesDirectory, gameDirectory);
 }
 
 // Updates the modpack
@@ -128,13 +114,12 @@ void Manager::update() {
 
     // Delete the current modpack files
     Logger::log("Clearing current modpack files...", logPath);
+    clearPatchers();
+    Logger::log("Cleared patchers.", logPath);
     clearPlugins();
     Logger::log("Cleared plugins.", logPath);
     clearConfig();
     Logger::log("Cleared config.", logPath);
-    clearPatchers();
-    Logger::log("Cleared patchers.", logPath);
-    Logger::log("Cleared plugins.", logPath);
 
     // Install the latest version of the modpack
     Logger::log("Installing latest modpack version...", logPath);
@@ -174,8 +159,7 @@ void Manager::clearPatchers() {
 // Returns whether the modpack is updated to the latest release or not
 bool Manager::isUpdated() {
     // Get the latest version number
-    std::string latestVersion;
-    // TODO - Get latest version number
+    std::string latestVersion = fetchLatestVersion(packUrl);
 
     // Compare it to the current version
     if (latestVersion != this->version) { return false; }
@@ -239,22 +223,201 @@ std::string Manager::locateGameLocation() {
 
 //=== URL FETCHERS
 // Returns a string of the latest url release
-std::string Manager::fetchLatestRelease(std::string owner = "m-riley04", std::string repo = "TheWolfPack") {
+std::string Manager::fetchLatestReleaseURL(std::string owner, std::string repo) {
     std::string url = "https://api.github.com/repos/";
     url += owner; url += "/"; url += repo; url += "/releases/latest";
+    packUrl = url;
     return url;
+}
+
+// Returns a QJsonDocument of the lastest release
+QJsonDocument Manager::fetchLatestRelease(std::string &url) {
+    QByteArray bytes = downloader.downloadJSONData(url);
+    QJsonDocument json = QJsonDocument::fromJson(bytes);
+
+    release = json;
+    return json;
 }
 
 // Returns a string of the lastest release's zipball download url
 std::string Manager::fetchReleaseDownload(std::string &url) {
-    Logger::log("Downloading JSON data from GitHub API...", logPath);
-    QByteArray bytes = downloader.downloadJSONData(url);
-    QJsonDocument json = QJsonDocument::fromJson(bytes);
-    QJsonObject jsonObj = json.object();
+    QJsonDocument json = release;
+    if (json.isEmpty() || json.isNull()) {
+        json = fetchLatestRelease(url);
+    }
 
-    std::string downloadURL = jsonObj.value(QString("zipball_url")).toString().toStdString();
+    std::string downloadURL = json.object().value(QString("zipball_url")).toString().toStdString();
 
     return downloadURL;
+}
+
+// Returns a string of the lastest release's version
+std::string Manager::fetchLatestVersion(std::string &url) {
+    QJsonDocument json = release;
+    if (json.isEmpty() || json.isNull()) {
+        json = fetchLatestRelease(url);
+    }
+
+    std::string latestVersion = json.object().value(QString("tag_name")).toString().toStdString();
+
+    return latestVersion;
+}
+
+// Returns a string of the latest release's changelog
+std::string Manager::fetchReleaseChangelog(std::string &url) {
+    QJsonDocument json = release;
+    if (json.isEmpty() || json.isNull()) {
+        json = fetchLatestRelease(url);
+    }
+
+    std::string changelog = json.object().value(QString("body")).toString().toStdString();
+
+    return changelog;
+}
+
+//=== SLOTS
+void Manager::doDownload() {
+    // Get the latest release URL
+    Logger::log("Grabbing latest release URL...", logPath);
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+    Logger::log("Latest Release: " + latestReleaseURL, logPath);
+    std::string url = this->fetchReleaseDownload(latestReleaseURL);
+    Logger::log("Latest Release Download: " + url, logPath);
+    std::string filename = "latest_release";
+
+    // Check if file is already in cache
+    Logger::log("Beginning download...", logPath);
+    if (std::filesystem::exists(cacheDirectory + "\\" + filename + ".zip")) {
+        Logger::log("Requested file already downloaded!", logPath);
+        onModpackDownloaded();
+        return;
+    }
+
+    // Implement threading
+    Downloader* worker      = new Downloader(url, cacheDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownload);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onModpackDownloaded);
+
+    thread.start();
+    Logger::log("Modpack download thread started.", logPath);
+}
+void Manager::doDownloadBepInEx() {
+    // Get the latest release URL
+    std::string bepinexURL = "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/";
+    std::string filename = "BepInEx";
+
+    // Check if file is already in cache
+    Logger::log("Beginning download...", logPath);
+    if (std::filesystem::exists(cacheDirectory + "\\" + filename + ".zip")) {
+        Logger::log("Requested file already downloaded!", logPath);
+        onBepInExDownloaded();
+        return;
+    }
+
+    // Implement threading
+    Downloader* worker      = new Downloader(bepinexURL, cacheDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownload);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onBepInExDownloaded);
+
+    thread.start();
+    Logger::log("BepInEx download thread started.", logPath);
+}
+void Manager::doUnzip() {
+    std::string filename = "latest_release";
+    // Extract the zip file to the cache directory
+    Logger::log("Extracting downloaded zip file...", logPath);
+    std::string zip = cacheDirectory + "\\" + filename + ".zip";
+    std::string output = cacheDirectory + "\\" + filename;
+    ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
+
+    onModpackUnzipped();
+}
+void Manager::doUnzipBepInEx() {
+    std::string filename = "BepInEx";
+    // Extract the zip file to the cache directory
+    Logger::log("Extracting downloaded zip file...", logPath);
+    std::string zip = cacheDirectory + "\\" + filename + ".zip";
+    std::string output = cacheDirectory + "\\" + filename;
+    ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
+
+    onBepInExUnzipped();
+}
+void Manager::doInstall() {
+    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
+    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Installer::doInstall);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Installer::installFinished, this, &Manager::onModpackInstalled);
+    //connect(worker, &Installer::installFinished, &thread, &QThread::quit);
+
+    thread.start();
+    Logger::log("Modpack install thread started.", logPath);
+}
+void Manager::doInstallBepInEx() {
+    std::string installationFilesDirectory = cacheDirectory + "\\BepInEx";
+    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Installer::doInstallBepInEx);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Installer::installBepInExFinished, this, &Manager::onBepInExInstalled);
+    //connect(worker, &Installer::installBepInExFinished, &thread, &QThread::quit);
+
+    thread.start();
+    Logger::log("BepInEx install thread started.", logPath);
+}
+void Manager::doUpdate() {
+    //update();
+    emit modpackUpdated();
+}
+
+void Manager::doUninstall() {
+    installer.doUninstall();
+}
+
+void Manager::onModpackDownloaded() {
+    thread.quit();
+    emit modpackDownloaded();
+}
+
+void Manager::onBepInExDownloaded() {
+    thread.quit();
+    emit bepInExDownloaded();
+}
+
+void Manager::onModpackUnzipped() {
+    emit modpackUnzipped();
+}
+
+void Manager::onBepInExUnzipped() {
+    emit bepInExUnzipped();
+}
+
+void Manager::onModpackInstalled() {
+    version = fetchLatestVersion(packUrl);
+
+    thread.quit();
+    emit modpackInstalled();
+}
+
+void Manager::onBepInExInstalled() {
+    thread.quit();
+    emit bepInExInstalled();
+}
+
+void Manager::onModpackUpdated() {
+    thread.quit();
+    emit modpackUpdated();
 }
 
 //=== GETTERS
@@ -267,6 +430,9 @@ Downloader& Manager::getDownloader() { return this->downloader; }
 // Returns a reference to the installer object
 Installer& Manager::getInstaller() { return this->installer; }
 
+// Returns a json document of the current release
+QJsonDocument& Manager::getRelease() { return this->release;}
+
 // Returns the current space avaliable on the game drive as an integer of bytes
 int Manager::getSpaceAvailable() { return std::filesystem::space(std::filesystem::path(gameDrive)).available; }
 
@@ -276,121 +442,3 @@ void Manager::setVersion(std::string version) { this->version = version; }
 void Manager::setGameDirectory(std::string directory) { this->gameDirectory = directory; }
 
 void Manager::setLogPath(std::string path) { this->logPath = path; }
-
-//=== SLOTS
-void Manager::doDownload() {
-    // Get the latest release URL
-    Logger::log("Grabbing latest release URL...", logPath);
-    std::string latestReleaseURL = this->fetchLatestRelease("m-riley04", "TheWolfPack");
-    Logger::log("Latest Release: " + latestReleaseURL, logPath);
-    std::string url = this->fetchReleaseDownload(latestReleaseURL);
-    Logger::log("Latest Release Download: " + url, logPath);
-    std::string filename = "latest_release";
-
-    // Implement threading
-    QThread* thread         = new QThread;
-    Downloader* worker      = new Downloader(url, cacheDirectory, filename);
-
-    Logger::log("Beginning download...", logPath);
-    if (std::filesystem::exists(cacheDirectory + "\\" + filename + ".zip")) {
-        emit modpackDownloaded();
-        thread->quit();
-        thread->deleteLater();
-        delete worker;
-        return;
-    }
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Downloader::doDownload);
-    connect(worker, &Downloader::downloadFinished, this, &Manager::modpackDownloaded);
-    connect(worker, &Downloader::downloadFinished, thread, &QThread::quit);
-    connect(worker, &Downloader::downloadFinished, worker, &Downloader::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    thread->start();
-    Logger::log("Modpack download thread started.", logPath);
-}
-void Manager::doDownloadBepInEx() {
-    // Get the latest release URL
-    std::string bepinexURL = "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2100/";
-    std::string filename = "BepInEx";
-
-    // Implement threading
-    QThread* thread         = new QThread;
-    Downloader* worker      = new Downloader(bepinexURL, cacheDirectory, filename);
-
-    Logger::log("Beginning download...", logPath);
-    if (std::filesystem::exists(cacheDirectory + "\\" + filename + ".zip")) {
-        emit bepInExDownloaded();
-        thread->quit();
-        thread->deleteLater();
-        delete worker;
-        return;
-    }
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Downloader::doDownload);
-    connect(worker, &Downloader::downloadFinished, this, &Manager::bepInExDownloaded);
-    connect(worker, &Downloader::downloadFinished, thread, &QThread::quit);
-    connect(worker, &Downloader::downloadFinished, worker, &Downloader::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    thread->start();
-    Logger::log("BepInEx download thread started.", logPath);
-}
-void Manager::doUnzip() {
-    std::string filename = "latest_release";
-    // Extract the zip file to the cache directory
-    Logger::log("Extracting downloaded zip file...", logPath);
-    std::string zip = cacheDirectory + "\\" + filename + ".zip";
-    std::string output = cacheDirectory + "\\" + filename;
-    ZipHandler::extract(zip, output);
-    Logger::log("Zip file has been extracted.", logPath);
-
-    emit modpackUnzipped();
-}
-void Manager::doUnzipBepInEx() {
-    std::string filename = "BepInEx";
-    // Extract the zip file to the cache directory
-    Logger::log("Extracting downloaded zip file...", logPath);
-    std::string zip = cacheDirectory + "\\" + filename + ".zip";
-    std::string output = cacheDirectory + "\\" + filename;
-    ZipHandler::extract(zip, output);
-    Logger::log("Zip file has been extracted.", logPath);
-
-    emit bepInExUnzipped();
-}
-void Manager::doInstall() {
-    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
-    QThread * thread = new QThread;
-    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Installer::doInstall);
-    connect(worker, &Installer::installFinished, this, &Manager::modpackInstalled);
-    connect(worker, &Installer::installFinished, thread, &QThread::quit);
-    connect(worker, &Installer::installFinished, worker, &Installer::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    thread->start();
-    Logger::log("Modpack install thread started.", logPath);
-}
-void Manager::doInstallBepInEx() {
-    std::string installationFilesDirectory = cacheDirectory + "\\BepInEx";
-    QThread * thread = new QThread;
-    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
-    worker->moveToThread(thread);
-
-    connect(thread, &QThread::started, worker, &Installer::doInstallBepInEx);
-    connect(worker, &Installer::installFinished, this, &Manager::bepInExInstalled);
-    connect(worker, &Installer::installFinished, thread, &QThread::quit);
-    connect(worker, &Installer::installFinished, worker, &Installer::deleteLater);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    thread->start();
-    Logger::log("BepInEx install thread started.", logPath);
-}
-void Manager::doUpdate() {
-    update();
-    emit modpackUpdated();
-}
