@@ -68,8 +68,8 @@ public slots:
     void onModpackUnzipped();
     void onModpackInstalled();
     void onInstallationError();
-    void onUpdateAvailable();
-    void onUpdateUnavailable();
+    void onUpToDate();
+    void onOutOfDate();
     void onModpackUpdated();
 
 protected:

@@ -723,12 +723,29 @@ void MainWindow::onModpackUpdated() {
     logger->log("Modpack updated successfully.");
 }
 
-void MainWindow::onUpdateAvailable() {
-
+void MainWindow::onUpToDate() {
+    logger->log("Modpack is up to date!");
+    QMessageBox::information(this, "Up to date", "The modpack is up to date!", QMessageBox::Ok);
 }
 
-void MainWindow::onUpdateUnavailable() {
+void MainWindow::onOutOfDate() {
+    logger->log("Modpack is out of date.");
 
+    // Confirm if they want to reset
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Update", "A newer modpack version has been found. Would you like to download and install the latest version of the modpack?",
+                                  QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        logger->log("=== UPDATING ===");
+
+        // Clear the old folders
+        manager.clearPatchers();
+        manager.clearPlugins();
+        manager.clearConfig();
+
+        // Download latest version
+        manager.doDownload();
+    }
 }
 
 //=== OVERRIDES
