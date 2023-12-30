@@ -24,6 +24,7 @@ public:
     void save();
     void load();
     void reset();
+    void clearCache();
 
     //=== App Initializations
     void initialize_core();

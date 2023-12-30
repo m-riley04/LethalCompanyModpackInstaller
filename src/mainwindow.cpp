@@ -270,6 +270,20 @@ void MainWindow::reset() {
     }
 }
 
+// Clears the cache directory from the executable path
+void MainWindow::clearCache() {
+    logger->log("Preparing to clear app cache...");
+    std::string cacheDirectory = QDir::currentPath().toStdString() + "\\cache";
+
+    if (std::filesystem::exists(QDir::currentPath().toStdString()) && std::filesystem::exists(cacheDirectory)) {
+        std::filesystem::remove_all(cacheDirectory);
+        std::filesystem::create_directory(cacheDirectory);
+        logger->log("App cache has been cleared.");
+        return;
+    }
+    logger->log("App cache was not cleared successfully (path error)");
+}
+
     }
 }
 
