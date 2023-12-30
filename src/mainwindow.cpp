@@ -155,6 +155,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     if (!firstOpen) {
         logger->log("Returning user detected: skipping first-time installation.");
+
+        initialize_home();
         ui->stack_installation->setCurrentWidget(ui->page_welcome);
         ui->stack_pages->setCurrentWidget(ui->page_home);
     }
@@ -443,6 +445,28 @@ void MainWindow::initialize_error() {
     pageCompleted = false;
     ui->btn_next->setEnabled(false);
     ui->btn_back->setEnabled(false);
+}
+
+void MainWindow::initialize_home() {
+    QString qVersion;
+    QString qChangelog;
+
+    if (releaseUrl == "" || changelog == "") {
+        // Get the latest release URL
+        releaseUrl = manager.fetchLatestReleaseURL();
+        // Set the changelog, version, and other home page things
+        QString qVersion = manager.fetchLatestRelease(releaseUrl).object().find("tag_name")->toString();
+        QString qChangelog = manager.fetchLatestRelease(releaseUrl).object().find("body")->toString();
+        modpackVersion = qVersion.toStdString();
+        changelog = qChangelog.toStdString();
+    }
+
+    // Set initial UI properties
+    ui->text_changelog->setMarkdown(qChangelog);
+    ui->label_version->setText(qVersion);
+    ui->stack_installation->setCurrentIndex(0);
+    ui->stack_installation->setCurrentWidget(ui->page_welcome);
+    ui->stack_pages->setCurrentWidget(ui->page_home);
 }
 
 //===== UPDATES

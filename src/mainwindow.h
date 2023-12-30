@@ -40,6 +40,7 @@ public:
     void initialize_working();
     void initialize_done();
     void initialize_error();
+    void initialize_home();
 
     //===== Updates
     void update_console();
