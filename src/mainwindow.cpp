@@ -130,34 +130,22 @@ MainWindow::MainWindow(QWidget *parent)
     manager.setLogPath(QDir::currentPath().toStdString() + "\\" + "log.txt");
 
     // Set Core Preferences
-    logger->log("Assigning application variables...");
-    QCoreApplication::setApplicationName("TheWolfPackInstaller");
-    QCoreApplication::setApplicationVersion("1.0.0");
-    QCoreApplication::setOrganizationName("Restless Medicine Studios");
-    QCoreApplication::setOrganizationDomain("restlessmedicine.com");
+    initialize_core();
 
-    // Set Stylesheet
-    QString stylesheetName = "stylesheet";
-    const QString stylesheetPath = QDir::currentPath() + "\\" + stylesheetName + ".qss";
-    setStyleSheet(readStylesheet(stylesheetPath));
+    // Set up fonts
+    initialize_fonts();
+
+    // Set up stylesheet
+    initialize_stylesheet();
 
     // Set up UI
     logger->log("Setting up UI...");
     ui->setupUi(this);
 
-    // Connect Widgets
-    logger->log("Connecting UI widgets...");
-    connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_next);
-    connect(ui->btn_back, &QPushButton::clicked, this, &MainWindow::clicked_back);
-    connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
-    connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
-    connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
-    connect(ui->btn_update, &QPushButton::clicked, this, &MainWindow::clicked_update);
-    connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
-    connect(ui->btn_reset, &QPushButton::clicked, this, &MainWindow::clicked_reset);
+    // Set up connections
+    initialize_connections();
 
     // Read user data
-    logger->log("Reading user data...");
     load();
 
     // Initialize Widgets
@@ -179,6 +167,64 @@ MainWindow::~MainWindow()
     delete logger;
 }
 
+//=== App Initializations
+void MainWindow::initialize_core() {
+    logger->log("Assigning application variables...");
+    QCoreApplication::setApplicationName("TheWolfPackManager");
+    QCoreApplication::setApplicationVersion("1.0.0");
+    QCoreApplication::setOrganizationName("Restless Medicine Studios");
+    QCoreApplication::setOrganizationDomain("restlessmedicine.com");
+
+    logger->log("Loading app icon...");
+    QIcon icon(QDir::currentPath() + "\\icon.ico");
+    this->setWindowIcon(icon);
+}
+
+void MainWindow::initialize_fonts() {
+    logger->log("Loading fonts...");
+    const QString fontName = "dos";
+    const QString fontPath = QDir::currentPath() + "\\styling\\fonts\\" + fontName + ".ttf";
+    const int fontID = QFontDatabase::addApplicationFont(fontPath);
+    QString family = QFontDatabase::applicationFontFamilies(fontID).at(0);
+    QFont font(family, 8);
+    QApplication::setFont(font);
+}
+
+void MainWindow::initialize_stylesheet() {
+    logger->log("Loading stylesheet...");
+    const QString stylesheetVariablesName = "stylesheet";
+    const QString stylesheetVariablesPath = QDir::currentPath() + "\\styling\\" + stylesheetVariablesName + ".vars";
+    const QString stylesheetName = "stylesheet";
+    const QString stylesheetPath = QDir::currentPath() + "\\styling\\" + stylesheetName + ".qss";
+    const QString stylesheet = readStylesheet(stylesheetPath, stylesheetVariablesPath);
+    setStyleSheet(stylesheet);
+}
+
+void MainWindow::initialize_connections() {
+    //=== Widgets
+    logger->log("Connecting UI widgets...");
+    connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_next);
+    connect(ui->btn_back, &QPushButton::clicked, this, &MainWindow::clicked_back);
+    connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
+    connect(ui->btn_update, &QPushButton::clicked, this, &MainWindow::clicked_update);
+    connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
+    connect(ui->btn_reset, &QPushButton::clicked, this, &MainWindow::clicked_reset);
+    connect(ui->btn_settings, &QPushButton::clicked, this, &MainWindow::clicked_settings);
+    connect(ui->btn_github, &QPushButton::clicked, this, &MainWindow::clicked_github);
+    connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
+    connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
+
+    //=== Installation and download signals/slots
+    logger->log("Connecting installation/download signals and slots...");
+    connect(&manager, &Manager::bepInExDownloaded, this, &MainWindow::onBepInExDownloaded);
+    connect(&manager, &Manager::bepInExUnzipped, this, &MainWindow::onBepInExUnzipped);
+    connect(&manager, &Manager::bepInExInstalled, this, &MainWindow::onBepInExInstalled);
+    connect(&manager, &Manager::modpackDownloaded, this, &MainWindow::onModpackDownloaded);
+    connect(&manager, &Manager::modpackUnzipped, this, &MainWindow::onModpackUnzipped);
+    connect(&manager, &Manager::modpackInstalled, this, &MainWindow::onModpackInstalled);
+}
+
+// Saves the user data
 void MainWindow::save() {
     logger->log("Saving user data to save file...");
 

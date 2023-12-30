@@ -20,9 +20,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    //===== User Data
+    //===== User Data/Functionalities
     void save();
     void load();
+
+    //=== App Initializations
+    void initialize_core();
+    void initialize_fonts();
+    void initialize_stylesheet();
+    void initialize_connections();
 
     //===== Page Initializations
     void initialize_welcome();
