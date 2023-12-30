@@ -392,36 +392,24 @@ void MainWindow::initialize_working() {
     ui->btn_back->setEnabled(false);
 
     // Configure console
-    //ui->text_console->setUpdatesEnabled(true);
-    //ui->text_console->setSource(QUrl(QDir::currentPath() + "\\log.txt"));
+    logger->log("Initializing console...");
+    update_console();
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainWindow::update_console);
+    connect(&manager, &Manager::modpackInstalled, timer, &QTimer::stop);
+    connect(&manager, &Manager::modpackInstalled, timer, &QTimer::deleteLater);
+    timer->start(1000);
 
-    // Connect installation and download signals/slots
-    connect(&manager, &Manager::bepInExDownloaded, this, &MainWindow::onBepInExDownloaded);
-    connect(&manager, &Manager::bepInExUnzipped, this, &MainWindow::onBepInExUnzipped);
-    connect(&manager, &Manager::bepInExInstalled, this, &MainWindow::onBepInExInstalled);
-    connect(&manager, &Manager::modpackDownloaded, this, &MainWindow::onModpackDownloaded);
-    connect(&manager, &Manager::modpackUnzipped, this, &MainWindow::onModpackUnzipped);
-    connect(&manager, &Manager::modpackInstalled, this, &MainWindow::onModpackInstalled);
-
-    try {
-        // Check if BepInEx is insalled
-        if (!manager.isBepInExInstalled()) {
-            // Download BepInEx
-            ui->label_progress->setText("Downloading BepInEx...");
-            logger->log("Downloading BepInEx...");
-            manager.doDownloadBepInEx();
-        } else {
-            // Download modpack
-            ui->label_progress->setText("Downloading modpack...");
-            manager.doDownload();
-        }
-
-    } catch (...) {
-        logger->log("ERROR: The installer has encountered an error and has canceled the installation.");
-
-        // Unsuccessful installation
-        initialize_error();
-        ui->stack_installation->setCurrentWidget(ui->page_error);
+    // Check if BepInEx is insalled
+    if (!manager.isBepInExInstalled()) {
+        // Download BepInEx
+        ui->label_progress->setText("Downloading BepInEx...");
+        logger->log("Downloading BepInEx...");
+        manager.doDownloadBepInEx();
+    } else {
+        // Download modpack
+        ui->label_progress->setText("Downloading modpack...");
+        manager.doDownload();
     }
 
 }
@@ -471,7 +459,31 @@ void MainWindow::initialize_home() {
 
 //===== UPDATES
 void MainWindow::update_console() {
+    QString logPath = QDir::currentPath() + "/log.txt";
+    QFile logFile(logPath);
+    if (!logFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        logger->log("Cannot open log file for console.");
+        return;
+    }
 
+    QTextStream in(&logFile);
+    QString finalString;
+
+    // Break the file apart line by line
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        // Add HTML line break
+        line += "<br/>";
+
+        // Connect to a final string
+        finalString += line;
+    }
+
+    // Close the file
+    logFile.close();
+
+    // Set the HTML
+    ui->text_console->setHtml(finalString);
 }
 
 //===== WIDGET COMMANDS
@@ -546,6 +558,8 @@ void MainWindow::clicked_finish() {
     ui->stack_pages->setCurrentWidget(ui->page_home);
     firstOpen = false;
     modpackInstalled = true;
+
+    // Save the user data
     save();
 }
 
@@ -576,7 +590,27 @@ void MainWindow::clicked_browse() {
 }
 
 void MainWindow::clicked_update() {
-    manager.doUpdate();
+    logger->log("BepInEx downloaded successfully.");
+
+    // Check the version
+    std::string url = manager.fetchLatestReleaseURL();
+    std::string latestModpackVersion = manager.fetchLatestVersion(url);
+    if (modpackVersion == latestModpackVersion) {
+        // Tell the user the modpack is up to date
+        onUpToDate();
+        return;
+    }
+
+    // If it's out of date...
+    onOutOfDate();
+}
+
+void navigate(QStackedWidget * stack, QWidget * page) {
+    stack->setCurrentWidget(page);
+}
+
+void MainWindow::clicked_settings() {
+    navigate(ui->stack_home, ui->page_settings);
 }
 
 void MainWindow::clicked_restart() {
