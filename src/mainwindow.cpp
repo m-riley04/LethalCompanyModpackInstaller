@@ -307,7 +307,21 @@ void MainWindow::clearCache() {
     logger->log("App cache was not cleared successfully (path error)");
 }
 
+// Uninstalls the modpack and BepInEx
+void MainWindow::uninstall() {
+    logger->log("Preparing to uninstall...");
+    try {
+        Installer::uninstall(gameDirectory);
+        clearCache();
+    } catch (GameNotFoundException) {
+        logger->log("ERROR: Uninstallation failed because game installation was not found.");
+        return;
+    } catch (...) {
+        logger->log("ERROR: An unexpected error has caused installation has failed.");
+        return;
     }
+
+    logger->log("Modpack has been uninstalled successfully.");
 }
 
 //===== PAGE INITIALIZATIONS
