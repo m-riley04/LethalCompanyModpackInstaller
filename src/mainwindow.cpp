@@ -4,31 +4,123 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDir>
-#include <QThread>
-#include <QtConcurrent>
+#include <QTimer>
 #include <QMessageBox>
+#include <QFontDatabase>
+#include <QDesktopServices>
+#include <Windows.h>
 
-// Reads a stylesheet from a given path and returns the raw text from the file
-QString readStylesheet(const QString &path) {
-    // Open the qss file
-    QFile file(path);
-    qDebug() << path;
 
-    // Check if the file was opened
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "ERROR: qss stylesheet was not loaded.";
-        return "";
+
+/* When given a stylesheet string and a .var file path, replaces
+ * all the variables found in the stylesheet string.
+ * Returns a new stylesheet string.
+*/
+QString replaceStylesheetVariables(const QString &stylesheet, const QString &path) {
+    QString text = stylesheet;
+
+    // Check path validity
+    if (path == "" || !QFile::exists(path)) {
+        throw std::invalid_argument("The path is invalid or does not exist.");
     }
 
-    // Save to text;
-    QString text(file.readAll().toStdString().c_str());
+    // Open variables file
+    QFile file(path);
+
+    // Check if the variables file was opened
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "ERROR: variables file was not able to be opened.";
+        file.close();
+        return text;
+    }
+
+    // Initialize map of variables
+    QMap<QString, QString> vars;
+
+    // Read all the lines of the file
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        // Read the line as a string
+        std::string line = in.readLine().toStdString();
+
+        // Check if it is a comment
+        if (line.at(0) == '/' && line.at(1) == '/') {
+            // Skip that line
+            continue;
+        }
+
+        // Clean the line of spaces
+        line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
+
+        // Split the string from a delimeter
+        std::string delimeter = "=";
+        size_t delimeterIndex = line.find(delimeter);
+        std::string variable = line.substr(0, delimeterIndex);
+        std::string value = line.substr(delimeterIndex+1, line.length()-1);
+
+        // Assign the variable and value to the vars map
+        vars[QString(variable.c_str())] = QString(value.c_str());
+    }
+
+    // Sort the variable names by length in descending order
+    QList<QString> sortedVars = vars.keys();
+    std::sort(sortedVars.begin(), sortedVars.end(), [](const QString &a, const QString &b) {
+        return a.length() > b.length(); // Sort by length, longest first
+    });
+
+    // Replace the mentions of each variable with their value
+    for (auto & variable : sortedVars) {
+        text.replace(variable, vars.value(variable));
+    }
 
     // Close the file
     file.close();
 
+    // Return the new text string
     return text;
 }
 
+/* Reads a stylesheet from a given path and returns the raw text from the file.
+ * If there is a "varsPath" string, uses the given varsPath to read custom qss variables
+ * from the .vars file. Variables are line-by-line and are formatted like so:
+ *
+ * @name = value
+*/
+QString readStylesheet(const QString &path, const QString &varsPath = "") {
+    // Check stylesheet path validity
+    if (path == "" || !QFile::exists(path)) {
+        throw std::invalid_argument("The stylesheet path is invalid or does not exist.");
+    }
+
+    // Initialize final return string
+    QString text;
+
+    // Open the qss file
+    QFile file(path);
+
+    // Check if the file was opened
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "ERROR: qss stylesheet was not opened.";
+        return "";
+    }
+
+    // Save to text
+    text = QString(file.readAll().toStdString().c_str());
+
+    // Check for custom variables
+    if (varsPath != "") {
+        text = replaceStylesheetVariables(text, varsPath);
+    }
+
+    // Close the file
+    file.close();
+
+    // Return the stylesheet file as a string
+    return text;
+
+}
+
+//=== CONSTRUCTOR/DESTRUCTOR
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
