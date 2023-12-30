@@ -246,12 +246,26 @@ void MainWindow::save() {
     }
 }
 
+// Loads the user data from the data file. If it doesn't exist, loads default values.
 void MainWindow::load() {
+    logger->log("Loading user data...");
+
     // Load all variables
     try {
         pageCompleted       = dataHandler.getValue("pageCompleted", true).toBool();
         modpackInstalled    = dataHandler.getValue("modpackInstalled", false).toBool();
         firstOpen           = dataHandler.getValue("firstOpen", true).toBool();
+        releaseUrl      = dataHandler.getValue("releaseUrl", "").toString().toStdString();
+        githubUrl       = dataHandler.getValue("githubUrl", "").toString().toStdString();
+        changelog       = dataHandler.getValue("changelog", "").toString().toStdString();
+        modpackVersion      = dataHandler.getValue("modpackVersion", "1.0.0").toString().toStdString();
+        gameDirectory       = dataHandler.getValue("gameDirectory", "").toString().toStdString();
+    } catch (...) {
+        logger->log("ERROR: Failed to reset user data");
+    }
+}
+
+// Resets the user data and sets them back to their default values
 void MainWindow::reset() {
     logger->log("Resetting user data...");
     try {
