@@ -1,0 +1,16 @@
+QWidget { background-color: @bg_first; color: @text}
+QWidget#background { background-color: @bg_second; color: @text}
+QLabel { color: @text }
+QFrame { background-color: @bg_second }
+QFrame#frame_warning { border: 2px solid red; border-radius: 4px}
+QCheckBox#checkbox_shortcut { background-color: @bg_second }
+QStackedWidget { background-color: @bg_first }
+QGroupBox * { background-color: @bg_first }
+QPushButton { background-color: @button; border: 0px solid white; border-radius: 4px; color: @text_button}
+QPushButton:!hover { background-color: @button }
+QPushButton:hover { background-color: @buttonHover }
+QPushButton:hover:pressed { background-color: @buttonPressed; color: @text }
+QPushButton:!enabled { background-color: @buttonDisabled }
+QMessageBox * { background-color: @bg_first; font: 16px }
+QMessageBox QAbstractButton {padding: 5px}
+QFrame#frame_navigation { background-color: @bg_third }

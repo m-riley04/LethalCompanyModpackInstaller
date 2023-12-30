@@ -46,18 +46,39 @@ set(PROJECT_SOURCES
         # UI
         src/mainwindow.ui
         src/stylesheets/stylesheet.qss
+        src/stylesheets/stylesheet.vars
 
         # Other
+        src/assets/icon.ico
+        src/assets/icon.rc
         vcpkg.json
 )
 
-# Move Stylesheet To Binary Folder
-configure_file(src/stylesheets/stylesheet.qss ${CMAKE_CURRENT_BINARY_DIR}/stylesheet.qss COPYONLY)
+# Add missing libraries
+#configure_file(src/assets/icon.ico ${CMAKE_CURRENT_BINARY_DIR}/icon.ico COPYONLY)
+
+# Move Styling To Binary Folder]
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/styling)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/styling/fonts)
+configure_file(src/fonts/dos.ttf ${CMAKE_CURRENT_BINARY_DIR}/styling/fonts/dos.ttf COPYONLY)
+configure_file(src/stylesheets/stylesheet.qss ${CMAKE_CURRENT_BINARY_DIR}/styling/stylesheet.qss COPYONLY)
+configure_file(src/stylesheets/stylesheet.vars ${CMAKE_CURRENT_BINARY_DIR}/styling/stylesheet.vars COPYONLY)
+
+# App Icon
+configure_file(src/assets/icon.ico ${CMAKE_CURRENT_BINARY_DIR}/icon.ico COPYONLY)
+configure_file(src/assets/icon.rc ${CMAKE_CURRENT_BINARY_DIR}/icon.rc COPYONLY)
+set(app_icon_resource_windows "${CMAKE_CURRENT_BINARY_DIR}/icon.rc")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(LethalCompanyModpackInstaller
+
+#target_sources(LethalCompanyModpackInstaller
+#  PRIVATE
+#    src/assets/icon.rc
+#)
+qt_add_executable(LethalCompanyModpackInstaller
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        ${app_icon_resouce_windows}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET LethalCompanyModpackInstaller APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
