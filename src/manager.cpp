@@ -57,13 +57,6 @@ void Manager::download() {
         this->downloader.download(url, cacheDirectory, filename);
         Logger::log("Download finished.", logPath);
     }
-
-    // Extract the zip file to the cache directory
-    Logger::log("Extracting downloaded zip file...", logPath);
-    std::string zip = cacheDirectory + "\\" + filename + ".zip";
-    std::string output = cacheDirectory + "\\" + filename;
-    ZipHandler::extract(zip, output);
-    Logger::log("Zip file has been extracted.", logPath);
 }
 
 void Manager::downloadBepInEx() {
@@ -75,7 +68,19 @@ void Manager::downloadBepInEx() {
         this->downloader.download(bepinexURL, cacheDirectory, "BepInEx");
         Logger::log("Download finished.", logPath);
     }
+}
 
+void Manager::unzip() {
+    std::string filename = "latest_release";
+    // Extract the zip file to the cache directory
+    Logger::log("Extracting downloaded zip file...", logPath);
+    std::string zip = cacheDirectory + "\\" + filename + ".zip";
+    std::string output = cacheDirectory + "\\" + filename;
+    ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
+}
+
+void Manager::unzipBepInEx() {
     // Extract the zip file to the cache directory
     Logger::log("Extracting downloaded zip file...", logPath);
     std::string zip = cacheDirectory + "\\BepInEx.zip";
