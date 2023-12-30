@@ -228,13 +228,22 @@ void MainWindow::initialize_connections() {
 void MainWindow::save() {
     logger->log("Saving user data to save file...");
 
-    // Set all data values
-    dataHandler.setValue("pageCompleted", QVariant(pageCompleted));
-    dataHandler.setValue("modpackInstalled", QVariant(modpackInstalled));
-    dataHandler.setValue("firstOpen", QVariant(firstOpen));
+    try {
+        // Set all data values
+        dataHandler.setValue("pageCompleted", QVariant(pageCompleted));
+        dataHandler.setValue("modpackInstalled", QVariant(modpackInstalled));
+        dataHandler.setValue("firstOpen", QVariant(firstOpen));
+        dataHandler.setValue("releaseUrl", QVariant(releaseUrl.c_str()));
+        dataHandler.setValue("githubUrl", QVariant(githubUrl.c_str()));
+        dataHandler.setValue("changelog", QVariant(changelog.c_str()));
+        dataHandler.setValue("modpackVersion", QVariant(modpackVersion.c_str()));
+        dataHandler.setValue("gameDirectory", QVariant(gameDirectory.c_str()));
 
-    // Save with data handler
-    dataHandler.save();
+        // Save with data handler
+        dataHandler.save();
+    } catch (...) {
+        logger->log("ERROR: Failed to save user data.");
+    }
 }
 
 void MainWindow::load() {
