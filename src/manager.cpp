@@ -4,7 +4,6 @@
 #include "ziphandler.h"
 #include "appexceptions.h"
 #include "logger.h"
-#include <QtConcurrent/QtConcurrent>
 
 //=== CONSTRUCTORS/DESTRUCTORS
 Manager::Manager() {
