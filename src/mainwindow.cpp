@@ -8,9 +8,6 @@
 #include <QMessageBox>
 #include <QFontDatabase>
 #include <QDesktopServices>
-#include <Windows.h>
-
-
 
 /* When given a stylesheet string and a .var file path, replaces
  * all the variables found in the stylesheet string.
@@ -120,6 +117,11 @@ QString readStylesheet(const QString &path, const QString &varsPath = "") {
 
 }
 
+// Naviagte to a given widget from a given widget stack
+void navigate(QStackedWidget * stack, QWidget * page) {
+    stack->setCurrentWidget(page);
+}
+
 //=== CONSTRUCTOR/DESTRUCTOR
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -209,20 +211,30 @@ void MainWindow::initialize_connections() {
     connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
     connect(ui->btn_update, &QPushButton::clicked, this, &MainWindow::clicked_update);
     connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
+    connect(ui->btn_retry, &QPushButton::clicked, this, &MainWindow::clicked_restart);
     connect(ui->btn_reset, &QPushButton::clicked, this, &MainWindow::clicked_reset);
     connect(ui->btn_settings, &QPushButton::clicked, this, &MainWindow::clicked_settings);
     connect(ui->btn_github, &QPushButton::clicked, this, &MainWindow::clicked_github);
     connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
     connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
 
-    //=== Installation and download signals/slots
-    logger->log("Connecting installation/download signals and slots...");
+    //=== BepInEx signals/slots
+    logger->log("Connecting BepInEx installation/download signals and slots...");
     connect(&manager, &Manager::bepInExDownloaded, this, &MainWindow::onBepInExDownloaded);
     connect(&manager, &Manager::bepInExUnzipped, this, &MainWindow::onBepInExUnzipped);
     connect(&manager, &Manager::bepInExInstalled, this, &MainWindow::onBepInExInstalled);
+
+    //=== Modpack signals/slots
+    logger->log("Connecting modpack installation/download signals and slots...");
     connect(&manager, &Manager::modpackDownloaded, this, &MainWindow::onModpackDownloaded);
     connect(&manager, &Manager::modpackUnzipped, this, &MainWindow::onModpackUnzipped);
     connect(&manager, &Manager::modpackInstalled, this, &MainWindow::onModpackInstalled);
+
+    //=== Update signals/slots
+    logger->log("Connecting update installation/download signals and slots...");
+    connect(&manager, &Manager::updateDownloaded, this, &MainWindow::onUpdateDownloaded);
+    connect(&manager, &Manager::updateUnzipped, this, &MainWindow::onUpdateUnzipped);
+    connect(&manager, &Manager::updateInstalled, this, &MainWindow::onUpdateInstalled);
 }
 
 // Saves the user data
@@ -357,12 +369,21 @@ void MainWindow::initialize_configuration() {
         ui->line_lethalCompanyLocation->setText(QString(gameDirectory.c_str()));
         ui->label_found->setText(QString("Yes"));
 
-        // Find the space available
-        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
-        ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
-
         // Log it
         logger->log("Game installation found.");
+
+        // Check game storage
+        logger->log("Checking game disk storage...");
+        std::string currentRoot = QDir(gameDirectory.c_str()).rootPath().toStdString();
+        const double spaceCurrent = manager.getAvailableStorage(currentRoot)/1000000000.00000;
+        ui->label_spaceAvailableGame->setText(QString(std::to_string(spaceCurrent).c_str()));
+        if (!manager.hasEnoughStorage(currentRoot, 1000000000)) {
+            ui->label_spaceAvailableGame->setStyleSheet("color: red");
+            QString warningMessage = "WARNING: Not enough storage on game location disk (" + QString(currentRoot.c_str()) + "). You MUST have at least 1 gigabyte of free space.";
+            QMessageBox::warning(this, "Not enough storage.", warningMessage, QMessageBox::Ok);
+        } else {
+            ui->label_spaceAvailableGame->setStyleSheet("color: white");
+        }
     } catch (GameNotFoundException e) {
         ui->label_found->setText(QString("No"));
         logger->log("Game installation NOT found.");
@@ -383,6 +404,25 @@ void MainWindow::initialize_configuration() {
         logger->log("BepInEx installation NOT found.");
     }
 
+    logger->log("Checking manager disk storage...");
+    std::string currentRoot = QDir::rootPath().toStdString();
+    const double spaceCurrent = manager.getAvailableStorage(currentRoot)/1000000000.00000;
+    ui->label_spaceAvailableCurrent->setText(QString(std::to_string(spaceCurrent).c_str()));
+    if (!manager.hasEnoughStorage(currentRoot, 1000000000)) {
+        ui->label_spaceAvailableCurrent->setStyleSheet("color: red");
+        // Tell the user they do not have enough storage until they have enough storage
+        QString warningMessage = "WARNING: Not enough storage on current working disk (" + QString(currentRoot.c_str()) + "). You MUST have at least 1 gigabyte of free space.";
+        while (!manager.hasEnoughStorage(currentRoot, 1000000000)) {
+            QMessageBox::StandardButton reply = QMessageBox::warning(this, "Not enough storage.", warningMessage, QMessageBox::Retry | QMessageBox::Cancel);
+            if (reply == QMessageBox::StandardButton::Cancel) {
+                initialize_cancel();
+                navigate(ui->stack_installation, ui->page_canceled);
+                break;
+            }
+        }
+    }
+    ui->label_spaceAvailableCurrent->setStyleSheet("color: white");
+
     logger->log("Installer 'Configration' page initialized.");
     logger->log("Awaiting configuration...");
 }
@@ -393,6 +433,20 @@ void MainWindow::initialize_working() {
     ui->btn_next->setText("Next");
     ui->btn_next->setEnabled(pageCompleted);
     ui->btn_back->setEnabled(false);
+
+    // Check storage again
+    logger->log("Re-checking manager disk storage...");
+    if (!manager.hasEnoughStorage(QDir::currentPath().toStdString(), 1000000000.00000)) {
+        initialize_error();
+        navigate(ui->stack_installation, ui->page_error);
+        return;
+    }
+    logger->log("Re-checking game drive storage...");
+    if (!manager.hasEnoughStorage(gameDirectory, 1000000000)) {
+        initialize_error();
+        navigate(ui->stack_installation, ui->page_error);
+        return;
+    }
 
     // Configure console
     logger->log("Initializing console...");
@@ -439,10 +493,14 @@ void MainWindow::initialize_error() {
     ui->btn_back->setEnabled(false);
 }
 
-void MainWindow::initialize_home() {
-    QString qVersion;
-    QString qChangelog;
+void MainWindow::initialize_cancel() {
+    logger->log("=== INSTALLATION CANCELED ===");
+    pageCompleted = true;
+    ui->btn_next->setEnabled(false);
+    ui->btn_back->setEnabled(false);
+}
 
+void MainWindow::initialize_home() {
     if (releaseUrl == "" || changelog == "") {
         // Get the latest release URL
         releaseUrl = manager.fetchLatestReleaseURL();
@@ -454,11 +512,9 @@ void MainWindow::initialize_home() {
     }
 
     // Set initial UI properties
-    ui->text_changelog->setMarkdown(qChangelog);
-    ui->label_version->setText(qVersion);
-    ui->stack_installation->setCurrentIndex(0);
-    ui->stack_installation->setCurrentWidget(ui->page_welcome);
-    ui->stack_pages->setCurrentWidget(ui->page_home);
+    ui->text_changelog->setMarkdown(QString(changelog.c_str()));
+    ui->label_version->setText(QString(modpackVersion.c_str()));
+    navigate(ui->stack_home, ui->page_index);
 }
 
 //===== UPDATES
@@ -579,14 +635,22 @@ void MainWindow::clicked_browse() {
 
     logger->log("Checking if chosen path exists...");
     if (std::filesystem::exists(path)) {
+        gameDirectory = path;
         manager.setGameDirectory(path);
         ui->line_lethalCompanyLocation->setText(QString(path.c_str()));
         ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
 
-        // Find the space available
-        logger->log("Checking avaliable space...");
-        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
-        ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
+        // Check game storage
+        logger->log("Checking game disk storage...");
+        std::string currentRoot = QDir(gameDirectory.c_str()).rootPath().toStdString();
+        const double spaceCurrent = manager.getAvailableStorage(currentRoot)/1000000000.00000;
+        ui->label_spaceAvailableGame->setText(QString(std::to_string(spaceCurrent).c_str()));
+        if (!manager.hasEnoughStorage(currentRoot, 1000000000)) {
+            ui->label_spaceAvailableGame->setStyleSheet("color: red");
+            QString warningMessage = "WARNING: Not enough storage on game location disk (" + QString(currentRoot.c_str()) + "). You MUST have at least 1 gigabyte of free space.";
+            QMessageBox::warning(this, "Not enough storage.", warningMessage, QMessageBox::Ok);
+        }
+        ui->label_spaceAvailableGame->setStyleSheet("color: white");
         return;
     }
     logger->log("Path does not exist. User cannot continue.");
@@ -594,8 +658,6 @@ void MainWindow::clicked_browse() {
 }
 
 void MainWindow::clicked_update() {
-    logger->log("BepInEx downloaded successfully.");
-
     // Check the version
     std::string url = manager.fetchLatestReleaseURL();
     std::string latestModpackVersion = manager.fetchLatestVersion(url);
@@ -607,10 +669,6 @@ void MainWindow::clicked_update() {
 
     // If it's out of date...
     onOutOfDate();
-}
-
-void navigate(QStackedWidget * stack, QWidget * page) {
-    stack->setCurrentWidget(page);
 }
 
 void MainWindow::clicked_settings() {
@@ -626,9 +684,10 @@ void MainWindow::clicked_restart() {
     uninstall();
 
     // Reset the pages
-    ui->stack_pages->setCurrentWidget(ui->page_installation);
-    ui->stack_installation->setCurrentWidget(ui->page_welcome);
-    ui->stack_home->setCurrentWidget(ui->page_index);
+    initialize_welcome();
+    navigate(ui->stack_installation, ui->page_welcome);
+    navigate(ui->stack_pages, ui->page_installation);
+    ui->stack_installation->setCurrentWidget(0);
 }
 
 void MainWindow::clicked_reset() {
@@ -679,9 +738,18 @@ void MainWindow::typed_gameLocation() {
         gameDirectory = ui->line_lethalCompanyLocation->text().toStdString();
         manager.setGameDirectory(gameDirectory);
         ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid green");
-        // Find the space available
-        std::string spaceAvailable = std::to_string(double(manager.getSpaceAvailable()/10000000000.0));
-        ui->label_spaceAvailable->setText(QString(spaceAvailable.c_str()));
+
+        // Check game storage
+        logger->log("Checking game disk storage...");
+        std::string currentRoot = QDir(gameDirectory.c_str()).rootPath().toStdString();
+        const double spaceCurrent = manager.getAvailableStorage(currentRoot)/1000000000.00000;
+        ui->label_spaceAvailableGame->setText(QString(std::to_string(spaceCurrent).c_str()));
+        if (!manager.hasEnoughStorage(currentRoot, 1000000000)) {
+            ui->label_spaceAvailableGame->setStyleSheet("color: red");
+            QString warningMessage = "WARNING: Not enough storage on game location disk (" + QString(currentRoot.c_str()) + "). You MUST have at least 1 gigabyte of free space.";
+            QMessageBox::warning(this, "Not enough storage.", warningMessage, QMessageBox::Ok);
+        }
+        ui->label_spaceAvailableGame->setStyleSheet("color: white");
         return;
     }
     ui->line_lethalCompanyLocation->setStyleSheet("border: 1px solid red");
@@ -736,19 +804,57 @@ void MainWindow::onInstallationError() {
     logger->log("=== INSTALLATION ERROR ===");
     ui->stack_installation->setCurrentWidget(ui->page_error);
 }
-void MainWindow::onModpackUpdated() {
-    logger->log("Modpack updated successfully.");
-}
+void MainWindow::onUpdateDownloaded() {
+    logger->log("Update downloaded successfully.");
 
+    logger->log("Preparing to unzip the update...");
+    manager.doUpdateUnzip();
+}
+void MainWindow::onUpdateUnzipped() {
+    logger->log("Update unzipped successfully.");
+
+    logger->log("Preparing to install the update...");
+    manager.doUpdateInstall();
+}
+void MainWindow::onUpdateInstalled() {
+
+    QMessageBox::information(this, "Updated", "Update has completed successfully!", QMessageBox::Ok);
+
+    initialize_home();
+    logger->log("Update installed successfully.");
+    logger->log("Modpack updated successfully.");
+    logger->log("=== UPDATING COMPLETE ===" );
+}
+void MainWindow::onModpackUpdated() {
+    //logger->log("Modpack updated successfully.");
+    //logger->log("=== UPDATING COMPLETE ===" );
+}
 void MainWindow::onUpToDate() {
     logger->log("Modpack is up to date!");
     QMessageBox::information(this, "Up to date", "The modpack is up to date!", QMessageBox::Ok);
 }
-
 void MainWindow::onOutOfDate() {
     logger->log("Modpack is out of date.");
 
-    // Confirm if they want to reset
+    // Check storage
+    logger->log("Checking available space on current disk...");
+    if (!manager.hasEnoughStorage(QDir::currentPath().toStdString(), 1000000000)) {
+        // Tell the user they do not have enough storage until they have enough storage
+        QString message = "WARNING: Not enough storage on current working disk (" + QDir::rootPath() + "). You MUST have at least 1 gigabyte of free space.";
+        QMessageBox::information(this, "Not enough storage.", message, QMessageBox::Ok);
+        return;
+    }
+    logger->log("Checking available space on game disk...");
+    if (gameDirectory != "") {
+        if (!manager.hasEnoughStorage(gameDirectory, 1000000000)) {
+            // Tell the user they do not have enough storage until they have enough storage
+            QString message = "WARNING: Not enough storage on current game disk (" + QString(std::filesystem::path(gameDirectory).root_path().string().c_str()) + "). You MUST have at least 1 gigabyte of free space.";
+            QMessageBox::information(this, "Not enough storage.", message, QMessageBox::Ok);
+            return;
+        }
+    }
+
+    // Confirm if they want to update
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Update", "A newer modpack version has been found. Would you like to download and install the latest version of the modpack?",
                                   QMessageBox::Yes|QMessageBox::No);
@@ -761,7 +867,7 @@ void MainWindow::onOutOfDate() {
         manager.clearConfig();
 
         // Download latest version
-        manager.doDownload();
+        manager.doUpdateDownload();
     }
 }
 

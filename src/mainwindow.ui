@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page_installation">
      <widget class="QFrame" name="frame_controls">
@@ -79,7 +79,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_welcome">
        <widget class="QFrame" name="frame_welcome">
@@ -261,9 +261,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>20</y>
+          <y>80</y>
           <width>771</width>
-          <height>411</height>
+          <height>301</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -290,7 +290,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <rect>
            <x>10</x>
            <y>80</y>
-           <width>151</width>
+           <width>201</width>
            <height>31</height>
           </rect>
          </property>
@@ -301,7 +301,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <widget class="QLineEdit" name="line_lethalCompanyLocation">
          <property name="geometry">
           <rect>
-           <x>170</x>
+           <x>210</x>
            <y>80</y>
            <width>471</width>
            <height>31</height>
@@ -311,7 +311,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <widget class="QPushButton" name="btn_browseLethalCompanyLocation">
          <property name="geometry">
           <rect>
-           <x>650</x>
+           <x>690</x>
            <y>80</y>
            <width>61</width>
            <height>31</height>
@@ -324,21 +324,21 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <widget class="QGroupBox" name="group_data">
          <property name="geometry">
           <rect>
-           <x>450</x>
+           <x>330</x>
            <y>130</y>
-           <width>261</width>
+           <width>421</width>
            <height>141</height>
           </rect>
          </property>
          <property name="title">
           <string>Supplementary Data</string>
          </property>
-         <widget class="QLabel" name="label_spaceRequired">
+         <widget class="QLabel" name="label_spaceAvailableGame">
           <property name="geometry">
            <rect>
-            <x>130</x>
+            <x>220</x>
             <y>90</y>
-            <width>121</width>
+            <width>151</width>
             <height>21</height>
            </rect>
           </property>
@@ -351,12 +351,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <rect>
             <x>10</x>
             <y>110</y>
-            <width>91</width>
+            <width>201</width>
             <height>21</height>
            </rect>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Space Available:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Space Available (current):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
          <widget class="QLabel" name="label_spaceRequiredStart">
@@ -364,20 +364,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <rect>
             <x>10</x>
             <y>90</y>
-            <width>91</width>
+            <width>201</width>
             <height>21</height>
            </rect>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Space Required:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Space Available (game):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-         <widget class="QLabel" name="label_spaceAvailable">
+         <widget class="QLabel" name="label_spaceAvailableCurrent">
           <property name="geometry">
            <rect>
-            <x>130</x>
+            <x>220</x>
             <y>110</y>
-            <width>121</width>
+            <width>151</width>
             <height>21</height>
            </rect>
           </property>
@@ -388,9 +388,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <widget class="QLabel" name="label_found">
           <property name="geometry">
            <rect>
-            <x>200</x>
+            <x>310</x>
             <y>30</y>
-            <width>51</width>
+            <width>101</width>
             <height>21</height>
            </rect>
           </property>
@@ -403,7 +403,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <rect>
             <x>10</x>
             <y>30</y>
-            <width>181</width>
+            <width>231</width>
             <height>21</height>
            </rect>
           </property>
@@ -416,7 +416,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <rect>
             <x>10</x>
             <y>50</y>
-            <width>181</width>
+            <width>231</width>
             <height>21</height>
            </rect>
           </property>
@@ -427,9 +427,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <widget class="QLabel" name="label_bepinexFound">
           <property name="geometry">
            <rect>
-            <x>200</x>
+            <x>310</x>
             <y>50</y>
-            <width>51</width>
+            <width>101</width>
             <height>21</height>
            </rect>
           </property>
@@ -437,8 +437,37 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;No&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
+         <widget class="QLabel" name="label_spaceAvailableGame_2">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>90</y>
+            <width>31</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;gb&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_spaceAvailableGame_3">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>110</y>
+            <width>31</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;gb&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QCheckBox" name="checkbox_shortcut">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -586,6 +615,69 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <bool>true</bool>
          </property>
         </widget>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_canceled">
+       <widget class="QFrame" name="frame_6">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>120</y>
+          <width>731</width>
+          <height>181</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QLabel" name="label_18">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>701</width>
+           <height>111</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:24pt;&quot;&gt;The installation and download process has been canceled.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_19">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>110</y>
+           <width>701</width>
+           <height>61</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Please restart the application or press &amp;quot;Retry&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QPushButton" name="btn_retry">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>310</y>
+          <width>80</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Retry</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="page_error">

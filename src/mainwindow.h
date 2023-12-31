@@ -40,6 +40,7 @@ public:
     void initialize_working();
     void initialize_done();
     void initialize_error();
+    void initialize_cancel();
     void initialize_home();
 
     //===== Updates
@@ -73,6 +74,9 @@ public slots:
     void onInstallationError();
     void onUpToDate();
     void onOutOfDate();
+    void onUpdateDownloaded();
+    void onUpdateUnzipped();
+    void onUpdateInstalled();
     void onModpackUpdated();
 
 protected:

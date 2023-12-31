@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QStorageInfo>
 #include "downloader.h"
 #include "installer.h"
 #include <zip.h>
@@ -43,13 +44,16 @@ public:
     //=== STATUS
     bool isUpdated();
     bool isBepInExInstalled();
+    bool hasEnoughStorage(std::string path, qint64 bytes);
+    qint64 getAvailableStorage(std::string path);
 
     //=== GETTERS
-    int getSpaceAvailable();
     std::string getVersion();
     Downloader &getDownloader();
     Installer &getInstaller();
     QJsonDocument& getRelease();
+    int getSpaceAvailable();
+    int getSpaceTotal();
 
     //=== SETTERS
     void setVersion(std::string version);
@@ -66,6 +70,9 @@ signals:
     void modpackUnzipped();
     void upToDate();
     void outOfDate();
+    void updateDownloaded();
+    void updateUnzipped();
+    void updateInstalled();
     void errorOccurred(QString error);
 
 public slots:
@@ -87,8 +94,15 @@ public slots:
     void onBepInExInstalled();
 
     // Updating
-    void doUpdate();
-    void onModpackUpdated();
+    void doUpdateDownload();
+    void doUpdateUnzip();
+    void doUpdateInstall();
+    void onUpdateDownloaded();
+    void onUpdateUnzipped();
+    void onUpdateInstalled();
+
+    // Fetching
+    //void doFetchLatestVersion(QString version);
 
 private:
     Downloader downloader;

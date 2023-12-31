@@ -185,6 +185,23 @@ bool Manager::isBepInExInstalled() {
     return false;
 }
 
+// Returns true if there is enough storage for the given path and size in bytes. False otherwise.
+bool Manager::hasEnoughStorage(std::string path, qint64 bytes) {
+    QStorageInfo info(QString(path.c_str()));
+
+    qint64 bytesAfter = info.bytesAvailable() - bytes;
+    if (bytesAfter <= 0) { return false; }
+
+    return true;
+}
+
+// Returns the amount of available storage on a path
+qint64 Manager::getAvailableStorage(std::string path) {
+    QStorageInfo info(QString(path.c_str()));
+
+    return info.bytesAvailable();
+}
+
 //=== FINDERS
 // Finds the game's installation directory
 std::string Manager::locateGameLocation() {
@@ -253,7 +270,7 @@ std::string Manager::fetchReleaseDownload(std::string &url) {
 
 // Returns a string of the lastest release's version
 std::string Manager::fetchLatestVersion(std::string &url) {
-    QJsonDocument json = release;
+    QJsonDocument json;
     if (json.isEmpty() || json.isNull()) {
         json = fetchLatestRelease(url);
     }
@@ -376,48 +393,88 @@ void Manager::doInstallBepInEx() {
     thread.start();
     Logger::log("BepInEx install thread started.", logPath);
 }
-void Manager::doUpdate() {
-    //update();
-    emit modpackUpdated();
-}
-
 void Manager::doUninstall() {
     installer.doUninstall();
 }
+void Manager::doUpdateDownload() {
+    // Get the latest release URL
+    Logger::log("Grabbing latest release URL...", logPath);
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+    Logger::log("Latest Release: " + latestReleaseURL, logPath);
+    std::string url = this->fetchReleaseDownload(latestReleaseURL);
+    Logger::log("Latest Release Download: " + url, logPath);
+    std::string filename = "latest_release";
 
+    // Implement threading
+    Downloader* worker      = new Downloader(url, cacheDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownload);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onUpdateDownloaded);
+
+    thread.start();
+    Logger::log("Modpack update download thread started.", logPath);
+}
+void Manager::doUpdateUnzip() {
+    std::string filename = "latest_release";
+    // Extract the zip file to the cache directory
+    Logger::log("Extracting downloaded zip file...", logPath);
+    std::string zip = cacheDirectory + "\\" + filename + ".zip";
+    std::string output = cacheDirectory + "\\" + filename;
+    ZipHandler::extract(zip, output);
+    Logger::log("Zip file has been extracted.", logPath);
+
+    onUpdateUnzipped();
+}
+void Manager::doUpdateInstall() {
+    std::string installationFilesDirectory = cacheDirectory + "\\latest_release";
+    Installer * worker = new Installer(installationFilesDirectory, gameDirectory);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Installer::doInstallUpdate);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Installer::installUpdateFinished, this, &Manager::onUpdateInstalled);
+
+    thread.start();
+    Logger::log("Modpack update install thread started.", logPath);
+}
 void Manager::onModpackDownloaded() {
     thread.quit();
     emit modpackDownloaded();
 }
-
 void Manager::onBepInExDownloaded() {
     thread.quit();
     emit bepInExDownloaded();
 }
-
 void Manager::onModpackUnzipped() {
     emit modpackUnzipped();
 }
-
 void Manager::onBepInExUnzipped() {
     emit bepInExUnzipped();
 }
-
 void Manager::onModpackInstalled() {
     version = fetchLatestVersion(packUrl);
 
     thread.quit();
     emit modpackInstalled();
 }
-
 void Manager::onBepInExInstalled() {
     thread.quit();
     emit bepInExInstalled();
 }
-
-void Manager::onModpackUpdated() {
+void Manager::onUpdateDownloaded() {
     thread.quit();
-    emit modpackUpdated();
+    emit updateDownloaded();
+}
+void Manager::onUpdateUnzipped() {
+    emit updateUnzipped();
+}
+void Manager::onUpdateInstalled() {
+    version = fetchLatestVersion(packUrl);
+
+    thread.quit();
+    emit updateInstalled();
 }
 
 //=== GETTERS

@@ -131,6 +131,11 @@ void Installer::doInstall() {
     install(filesDirectory, gameDirectory);
     onInstallFinished();
 }
+
+void Installer::doInstallUpdate() {
+    install(filesDirectory, gameDirectory);
+    onInstallUpdateFinished();
+}
 void Installer::doInstallBepInEx() {
     installBepInEx(filesDirectory, gameDirectory);
     onInstallBepInExFinished();
@@ -141,18 +146,20 @@ void Installer::doUninstall() {
 }
 void Installer::onInstallFinished() {
 
-
     emit installFinished();
 }
 void Installer::onInstallBepInExFinished() {
 
     emit installBepInExFinished();
 }
+void Installer::onInstallUpdateFinished() {
+    emit installUpdateFinished();
+}
 void Installer::onUninstallFinished() {
-
 
     emit uninstallFinished();
 }
+
 //=== GETTERS/SETTERS
 void Installer::setFilesDirectory(std::string directory) {
     filesDirectory = directory;
