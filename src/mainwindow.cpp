@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QFontDatabase>
 #include <QDesktopServices>
+#include <QScrollBar>
 
 /* When given a stylesheet string and a .var file path, replaces
  * all the variables found in the stylesheet string.
@@ -213,6 +214,7 @@ void MainWindow::initialize_connections() {
     connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
     connect(ui->btn_retry, &QPushButton::clicked, this, &MainWindow::clicked_restart);
     connect(ui->btn_reset, &QPushButton::clicked, this, &MainWindow::clicked_reset);
+    connect(ui->btn_home, &QPushButton::clicked, this, &MainWindow::clicked_home);
     connect(ui->btn_settings, &QPushButton::clicked, this, &MainWindow::clicked_settings);
     connect(ui->btn_github, &QPushButton::clicked, this, &MainWindow::clicked_github);
     connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
@@ -226,15 +228,18 @@ void MainWindow::initialize_connections() {
 
     //=== Modpack signals/slots
     logger->log("Connecting modpack installation/download signals and slots...");
+    connect(&manager, &Manager::modpackFetched, this, &MainWindow::onModpackFetched);
     connect(&manager, &Manager::modpackDownloaded, this, &MainWindow::onModpackDownloaded);
     connect(&manager, &Manager::modpackUnzipped, this, &MainWindow::onModpackUnzipped);
     connect(&manager, &Manager::modpackInstalled, this, &MainWindow::onModpackInstalled);
 
     //=== Update signals/slots
     logger->log("Connecting update installation/download signals and slots...");
+    connect(&manager, &Manager::updateFetched, this, &MainWindow::onUpdateFetched);
     connect(&manager, &Manager::updateDownloaded, this, &MainWindow::onUpdateDownloaded);
     connect(&manager, &Manager::updateUnzipped, this, &MainWindow::onUpdateUnzipped);
     connect(&manager, &Manager::updateInstalled, this, &MainWindow::onUpdateInstalled);
+    connect(&manager, &Manager::updateFailed, this, &MainWindow::onUpdateFailed);
 }
 
 // Saves the user data
@@ -290,15 +295,6 @@ void MainWindow::reset() {
         changelog = "";
         modpackVersion = "1.0.0";
         gameDirectory = "";
-
-        dataHandler.setValue("pageCompleted", pageCompleted);
-        dataHandler.setValue("modpackInstalled", modpackInstalled);
-        dataHandler.setValue("firstOpen", firstOpen);
-        dataHandler.setValue("releaseUrl", QVariant(releaseUrl.c_str()));
-        dataHandler.setValue("githubUrl", QVariant(githubUrl.c_str()));
-        dataHandler.setValue("changelog", QVariant(changelog.c_str()));
-        dataHandler.setValue("modpackVersion", QVariant(modpackVersion.c_str()));
-        dataHandler.setValue("gameDirectory", QVariant(gameDirectory.c_str()));
 
         save();
     } catch (...) {
@@ -461,12 +457,13 @@ void MainWindow::initialize_working() {
     if (!manager.isBepInExInstalled()) {
         // Download BepInEx
         ui->label_progress->setText("Downloading BepInEx...");
-        logger->log("Downloading BepInEx...");
+        logger->log("Preparing to download BepInEx...");
         manager.doDownloadBepInEx();
     } else {
         // Download modpack
-        ui->label_progress->setText("Downloading modpack...");
-        manager.doDownload();
+        ui->label_progress->setText("Fetching modpack...");
+        logger->log("Preparing to fetch the modpack...");
+        manager.doFetchModpack();
     }
 }
 
@@ -544,6 +541,13 @@ void MainWindow::update_console() {
 
     // Set the HTML
     ui->text_console->setHtml(finalString);
+
+    // Set the scroll to the bottom
+    ui->text_console->verticalScrollBar()->setValue(ui->text_console->verticalScrollBar()->maximum());
+}
+
+void MainWindow::update_background() {
+
 }
 
 //===== WIDGET COMMANDS
@@ -658,17 +662,13 @@ void MainWindow::clicked_browse() {
 }
 
 void MainWindow::clicked_update() {
-    // Check the version
-    std::string url = manager.fetchLatestReleaseURL();
-    std::string latestModpackVersion = manager.fetchLatestVersion(url);
-    if (modpackVersion == latestModpackVersion) {
-        // Tell the user the modpack is up to date
-        onUpToDate();
-        return;
-    }
+    // Check the update version
+    connect(&manager, &Manager::fetched, this, &MainWindow::onUpdateChecked);
+    manager.doFetch("latest_release");
+}
 
-    // If it's out of date...
-    onOutOfDate();
+void MainWindow::clicked_home() {
+    navigate(ui->stack_home, ui->page_index);
 }
 
 void MainWindow::clicked_settings() {
@@ -760,27 +760,39 @@ void MainWindow::onBepInExDownloaded() {
     logger->log("BepInEx downloaded successfully.");
 
     // Move on to unzipping
+    logger->log("Preparing to unzip BepInEx...");
     ui->label_progress->setText("Unzipping BepInEx...");
     manager.doUnzipBepInEx();
 }
 void MainWindow::onBepInExUnzipped() {
     logger->log("BepInEx unzipped successfully.");
 
-    // Move on to unzipping
+    // Move on to install
+    logger->log("Preparing to install BepInEx...");
     ui->label_progress->setText("Installing BepInEx...");
     manager.doInstallBepInEx();
 }
 void MainWindow::onBepInExInstalled() {
     logger->log("BepInEx installed successfully.");
 
+    // Move on to the modpack fetch
+    logger->log("Preparing to fetch the modpack...");
+    ui->label_progress->setText("Fetching modpack...");
+    manager.doFetchModpack();
+}
+void MainWindow::onModpackFetched() {
+    logger->log("Update fetched successfully.");
+
     // Move on to the modpack download
     ui->label_progress->setText("Downloading modpack...");
+    logger->log("Preparing to download the modpack...");
     manager.doDownload();
 }
 void MainWindow::onModpackDownloaded() {
     logger->log("Modpack downloaded successfully.");
 
     // Move on to installation
+    logger->log("Preparing to unzip the modpack...");
     ui->label_progress->setText("Unzipping modpack...");
     manager.doUnzip();
 }
@@ -788,6 +800,7 @@ void MainWindow::onModpackUnzipped() {
     logger->log("Modpack unzipped successfully.");
 
     // Move on to installation
+    logger->log("Preparing to install the modpack...");
     ui->label_progress->setText("Installing modpack...");
     manager.doInstall();
 }
@@ -804,6 +817,25 @@ void MainWindow::onInstallationError() {
     logger->log("=== INSTALLATION ERROR ===");
     ui->stack_installation->setCurrentWidget(ui->page_error);
 }
+void MainWindow::onUpdateChecked() {
+    disconnect(&manager, &Manager::fetched, this, &MainWindow::onUpdateChecked);
+    modpackVersion = manager.getInstallationRelease().value("tag_name").toString().toStdString();
+    std::string latestVersion = manager.getLatestRelease().value("tag_name").toString().toStdString();
+    if (modpackVersion == latestVersion) {
+        // Tell the user the modpack is up to date
+        onUpToDate();
+        return;
+    }
+
+    // If it's out of date...
+    onOutOfDate();
+}
+void MainWindow::onUpdateFetched() {
+    logger->log("Update fetched successfully.");
+
+    logger->log("Preparing to download the update...");
+    manager.doUpdateDownload();
+}
 void MainWindow::onUpdateDownloaded() {
     logger->log("Update downloaded successfully.");
 
@@ -817,17 +849,19 @@ void MainWindow::onUpdateUnzipped() {
     manager.doUpdateInstall();
 }
 void MainWindow::onUpdateInstalled() {
-
+    // Tell the user
     QMessageBox::information(this, "Updated", "Update has completed successfully!", QMessageBox::Ok);
+    ui->btn_update->setText("Check for Update");
 
     initialize_home();
     logger->log("Update installed successfully.");
     logger->log("Modpack updated successfully.");
     logger->log("=== UPDATING COMPLETE ===" );
 }
-void MainWindow::onModpackUpdated() {
-    //logger->log("Modpack updated successfully.");
-    //logger->log("=== UPDATING COMPLETE ===" );
+void MainWindow::onUpdateFailed() {
+    logger->log("=== UPDATE FAILED ===");
+    QMessageBox::information(this, "Update failed.", "Update has failed! Please try again.", QMessageBox::Ok);
+    ui->btn_update->setText("Check for Update");
 }
 void MainWindow::onUpToDate() {
     logger->log("Modpack is up to date!");
@@ -860,14 +894,15 @@ void MainWindow::onOutOfDate() {
                                   QMessageBox::Yes|QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         logger->log("=== UPDATING ===");
+        ui->btn_update->setText("Updating...");
 
         // Clear the old folders
         manager.clearPatchers();
         manager.clearPlugins();
         manager.clearConfig();
 
-        // Download latest version
-        manager.doUpdateDownload();
+        // Fetch latest version
+        manager.doUpdateFetch("installed_release");
     }
 }
 

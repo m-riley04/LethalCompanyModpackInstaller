@@ -269,7 +269,7 @@ std::string Manager::fetchReleaseDownload(std::string &url) {
 
 // Returns a string of the lastest release's version
 std::string Manager::fetchLatestVersion(std::string &url) {
-    QJsonDocument json;
+    QJsonDocument json = release;
     if (json.isEmpty() || json.isNull()) {
         json = fetchLatestRelease(url);
     }
@@ -292,6 +292,22 @@ std::string Manager::fetchReleaseChangelog(std::string &url) {
 }
 
 //=== SLOTS
+void Manager::doFetchModpack() {
+    // Get the latest release URL
+    Logger::log("Grabbing latest release URL...", logPath);
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+    std::string filename = "installation_release";
+
+    Downloader * worker     = new Downloader(latestReleaseURL, userDataDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownloadJson);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onModpackFetched);
+
+    thread.start();
+    Logger::log("Modpack fetch thread started.", logPath);
+}
 void Manager::doDownload() {
     // Get the latest release URL
     Logger::log("Grabbing latest release URL...", logPath);
@@ -395,6 +411,36 @@ void Manager::doInstallBepInEx() {
 void Manager::doUninstall() {
     installer.doUninstall();
 }
+void Manager::doFetch(std::string filename) {
+    // Get the latest release URL
+    Logger::log("Grabbing latest release URL...", logPath);
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+
+    Downloader * worker     = new Downloader(latestReleaseURL, cacheDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownloadJson);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onFetched);
+
+    thread.start();
+    Logger::log("Fetch thread started.", logPath);
+}
+void Manager::doUpdateFetch(std::string filename) {
+    // Get the latest release URL
+    Logger::log("Grabbing latest release URL...", logPath);
+    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+
+    Downloader * worker     = new Downloader(latestReleaseURL, userDataDirectory, filename);
+    worker->moveToThread(&thread);
+
+    connect(&thread, &QThread::started, worker, &Downloader::doDownload);
+    connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(worker, &Downloader::downloadFinished, this, &Manager::onUpdateFetched);
+
+    thread.start();
+    Logger::log("Update fetch thread started.", logPath);
+}
 void Manager::doUpdateDownload() {
     // Get the latest release URL
     Logger::log("Grabbing latest release URL...", logPath);
@@ -438,19 +484,31 @@ void Manager::doUpdateInstall() {
     thread.start();
     Logger::log("Modpack update install thread started.", logPath);
 }
-void Manager::onModpackDownloaded() {
+/*void Manager::onBepInExFetched() {
     thread.quit();
-    emit modpackDownloaded();
-}
+    emit bepInExFetched();
+}*/
 void Manager::onBepInExDownloaded() {
     thread.quit();
     emit bepInExDownloaded();
 }
-void Manager::onModpackUnzipped() {
-    emit modpackUnzipped();
-}
 void Manager::onBepInExUnzipped() {
     emit bepInExUnzipped();
+}
+void Manager::onBepInExInstalled() {
+    thread.quit();
+    emit bepInExInstalled();
+}
+void Manager::onModpackFetched() {
+    thread.quit();
+    emit modpackFetched();
+}
+void Manager::onModpackDownloaded() {
+    thread.quit();
+    emit modpackDownloaded();
+}
+void Manager::onModpackUnzipped() {
+    emit modpackUnzipped();
 }
 void Manager::onModpackInstalled() {
     version = fetchLatestVersion(packUrl);
@@ -458,9 +516,13 @@ void Manager::onModpackInstalled() {
     thread.quit();
     emit modpackInstalled();
 }
-void Manager::onBepInExInstalled() {
+void Manager::onFetched() {
     thread.quit();
-    emit bepInExInstalled();
+    emit fetched();
+}
+void Manager::onUpdateFetched() {
+    thread.quit();
+    emit updateFetched();
 }
 void Manager::onUpdateDownloaded() {
     thread.quit();
@@ -470,13 +532,54 @@ void Manager::onUpdateUnzipped() {
     emit updateUnzipped();
 }
 void Manager::onUpdateInstalled() {
-    version = fetchLatestVersion(packUrl);
-
     thread.quit();
     emit updateInstalled();
 }
-
+void Manager::onUpdateFailed() {
+    thread.quit();
+    emit updateFailed();
+}
 //=== GETTERS
+QJsonObject Manager::getInstallationRelease() {
+    std::string path = userDataDirectory + "\\installation_release.json";
+    QFile file(QString(path.c_str()));
+    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+
+        QByteArray bytes = file.readAll();
+        file.close();
+
+        QJsonParseError jsonError;
+        QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
+        if( jsonError.error != QJsonParseError::NoError )
+        {
+            Logger::log("There was an error parsing the Json file.", logPath);
+            return QJsonObject();
+        }
+        return document.object();
+    }
+    Logger::log("There was an error opening the json file.", logPath);
+    return QJsonObject();
+}
+QJsonObject Manager::getLatestRelease() {
+    std::string path = cacheDirectory + "\\latest_release.json";
+    QFile file(QString(path.c_str()));
+    if (file.exists() && file.open(QIODevice::ReadOnly)) {
+
+        QByteArray bytes = file.readAll();
+        file.close();
+
+        QJsonParseError jsonError;
+        QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
+        if( jsonError.error != QJsonParseError::NoError )
+        {
+            Logger::log("There was an error parsing the json file.", logPath);
+            return QJsonObject();
+        }
+        return document.object();
+    }
+    Logger::log("There was an error opening the json file.", logPath);
+    return QJsonObject();
+}
 // Returns the current version
 std::string Manager::getVersion() { return this->version; }
 
@@ -487,7 +590,7 @@ Downloader& Manager::getDownloader() { return this->downloader; }
 Installer& Manager::getInstaller() { return this->installer; }
 
 // Returns a json document of the current release
-QJsonDocument& Manager::getRelease() { return this->release;}
+QJsonDocument& Manager::getRelease() { return this->release; }
 
 // Returns the current space avaliable on the game drive as an integer of bytes
 int Manager::getSpaceAvailable() { return std::filesystem::space(std::filesystem::path(gameDrive)).available; }

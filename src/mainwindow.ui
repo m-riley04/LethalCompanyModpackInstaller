@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="page_installation">
      <widget class="QFrame" name="frame_controls">
@@ -317,6 +317,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <height>31</height>
           </rect>
          </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
          <property name="text">
           <string>Browse</string>
          </property>
@@ -344,6 +347,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </property>
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLabel" name="label_spaceAvailableStart">
@@ -384,6 +390,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
          </widget>
          <widget class="QLabel" name="label_found">
           <property name="geometry">
@@ -396,6 +405,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </property>
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;No&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLabel" name="label_foundLabel">
@@ -435,6 +447,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </property>
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;No&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QLabel" name="label_spaceAvailableGame_2">
@@ -885,13 +900,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <number>0</number>
       </property>
       <widget class="QWidget" name="page_index">
-       <widget class="QTextBrowser" name="text_changelog">
+       <widget class="QTextBrowser" name="text_changelogLatest">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>130</y>
-          <width>531</width>
-          <height>331</height>
+          <width>321</width>
+          <height>311</height>
          </rect>
         </property>
        </widget>
@@ -900,7 +915,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <rect>
           <x>10</x>
           <y>80</y>
-          <width>461</width>
+          <width>321</width>
           <height>41</height>
          </rect>
         </property>
@@ -912,8 +927,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>10</y>
-          <width>211</width>
+          <y>40</y>
+          <width>151</width>
           <height>41</height>
          </rect>
         </property>
@@ -921,30 +936,115 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Version:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_version">
+       <widget class="QLabel" name="label_versionLatest">
         <property name="geometry">
          <rect>
-          <x>220</x>
-          <y>10</y>
-          <width>321</width>
+          <x>160</x>
+          <y>40</y>
+          <width>171</width>
           <height>41</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Version:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Version</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btn_github">
         <property name="geometry">
          <rect>
-          <x>550</x>
-          <y>430</y>
+          <x>10</x>
+          <y>450</y>
           <width>131</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string>GitHub Source</string>
+         <string>GitHub Repo</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_versionHeading_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>0</y>
+          <width>321</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Latest Version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_changelog_2">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>80</y>
+          <width>321</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Changelog&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QTextBrowser" name="text_changelog">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>130</y>
+          <width>321</width>
+          <height>311</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_versionHeading_3">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>0</y>
+          <width>321</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Installed Version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_version">
+        <property name="geometry">
+         <rect>
+          <x>500</x>
+          <y>40</y>
+          <width>171</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Version</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_versionHeading_4">
+        <property name="geometry">
+         <rect>
+          <x>350</x>
+          <y>40</y>
+          <width>151</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Version:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </widget>
@@ -983,7 +1083,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
+         <y>50</y>
          <width>101</width>
          <height>31</height>
         </rect>
@@ -992,11 +1092,24 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <string>Settings</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="btn_home">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Home</string>
+       </property>
+      </widget>
       <widget class="QPushButton" name="btn_update">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>470</y>
+         <y>460</y>
          <width>101</width>
          <height>31</height>
         </rect>

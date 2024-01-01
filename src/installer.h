@@ -30,6 +30,7 @@ signals:
     void installUpdateFinished();
     void uninstallFinished();
     void installError();
+    void installUpdateFailed();
     void uninstallError();
 
 public slots:
@@ -40,6 +41,7 @@ public slots:
     void onInstallFinished();
     void onInstallBepInExFinished();
     void onInstallUpdateFinished();
+    void onInstallUpdateFailed();
     void onUninstallFinished();
 
 private:

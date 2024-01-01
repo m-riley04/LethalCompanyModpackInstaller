@@ -133,8 +133,12 @@ void Installer::doInstall() {
 }
 
 void Installer::doInstallUpdate() {
-    install(filesDirectory, gameDirectory);
-    onInstallUpdateFinished();
+    try {
+        install(filesDirectory, gameDirectory);
+        onInstallUpdateFinished();
+    } catch (...) {
+        onInstallUpdateFailed();
+    }
 }
 void Installer::doInstallBepInEx() {
     installBepInEx(filesDirectory, gameDirectory);
@@ -153,6 +157,9 @@ void Installer::onInstallBepInExFinished() {
     emit installBepInExFinished();
 }
 void Installer::onInstallUpdateFinished() {
+    emit installUpdateFinished();
+}
+void Installer::onInstallUpdateFailed() {
     emit installUpdateFinished();
 }
 void Installer::onUninstallFinished() {

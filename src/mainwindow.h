@@ -45,6 +45,7 @@ public:
 
     //===== Updates
     void update_console();
+    void update_background();
 
     //===== Button Commands
     void clicked_next();
@@ -53,6 +54,7 @@ public:
     void clicked_finish();
     void clicked_restart();
     void clicked_update();
+    void clicked_home();
     void clicked_settings();
     void clicked_reset();
     void clicked_clearCache();
@@ -68,16 +70,22 @@ public slots:
     void onBepInExDownloaded();
     void onBepInExUnzipped();
     void onBepInExInstalled();
+
+    void onModpackFetched();
     void onModpackDownloaded();
     void onModpackUnzipped();
     void onModpackInstalled();
+
     void onInstallationError();
     void onUpToDate();
     void onOutOfDate();
+
+    void onUpdateChecked();
+    void onUpdateFetched();
     void onUpdateDownloaded();
     void onUpdateUnzipped();
     void onUpdateInstalled();
-    void onModpackUpdated();
+    void onUpdateFailed();
 
 protected:
     //===== Overrides

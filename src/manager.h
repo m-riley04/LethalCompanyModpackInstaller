@@ -48,6 +48,8 @@ public:
     qint64 getAvailableStorage(std::string path);
 
     //=== GETTERS
+    QJsonObject getInstallationRelease();
+    QJsonObject getLatestRelease();
     std::string getVersion();
     Downloader &getDownloader();
     Installer &getInstaller();
@@ -61,48 +63,65 @@ public:
     void setLogPath(std::string path);
 
 signals:
+    //void bepInExFetched();
     void bepInExDownloaded();
     void bepInExInstalled();
     void bepInExUnzipped();
+
+    void modpackFetched();
     void modpackDownloaded();
     void modpackInstalled();
     void modpackUpdated();
     void modpackUnzipped();
+
     void upToDate();
     void outOfDate();
+    void fetched();
+    void updateFetched();
     void updateDownloaded();
     void updateUnzipped();
     void updateInstalled();
+    void updateFailed();
     void errorOccurred(QString error);
 
 public slots:
+    // General Fetching
+    void doFetchModpack();
     void doDownload();
     void doUnzip();
     void doInstall();
     void doUninstall();
 
+    //void doFetchBepInEx();
     void doDownloadBepInEx();
     void doUnzipBepInEx();
     void doInstallBepInEx();
 
+    void onModpackFetched();
     void onModpackDownloaded();
     void onModpackUnzipped();
     void onModpackInstalled();
 
+    //void onBepInExFetched();
     void onBepInExDownloaded();
     void onBepInExUnzipped();
     void onBepInExInstalled();
 
     // Updating
+    void doUpdateFetch(std::string filename = "latest_release");
     void doUpdateDownload();
     void doUpdateUnzip();
     void doUpdateInstall();
+    void onUpdateFetched();
     void onUpdateDownloaded();
     void onUpdateUnzipped();
     void onUpdateInstalled();
+    void onUpdateFailed();
 
-    // Fetching
-    //void doFetchLatestVersion(QString version);
+
+    // General Fetching
+    void doFetch(std::string filename);
+    void onFetched();
 
 private:
     Downloader downloader;
