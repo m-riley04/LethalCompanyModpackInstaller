@@ -114,8 +114,6 @@ void Downloader::onDownloadFinished(QNetworkReply * reply) {
         // Emit the signal
         emit downloadFinished(data);
     }
-
-
 }
 
 void Downloader::onDownloadJsonFinished(QNetworkReply * reply) {
@@ -146,8 +144,6 @@ void Downloader::onDownloadJsonFinished(QNetworkReply * reply) {
         // Emit the signal
         emit downloadFinished(data);
     }
-
-
 }
 
 void Downloader::doDownload() {
