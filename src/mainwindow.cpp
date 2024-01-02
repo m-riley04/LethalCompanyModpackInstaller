@@ -686,7 +686,9 @@ void MainWindow::clicked_browse() {
 void MainWindow::clicked_update() {
     // Check the update version
     connect(&manager, &Manager::fetched, this, &MainWindow::onUpdateChecked);
-    manager.doFetch("latest_release");
+    ui->btn_update->setText("Checking...");
+    ui->btn_update->setDisabled(true);
+    manager.doFetch();
 }
 
 void MainWindow::clicked_home() {
@@ -875,6 +877,7 @@ void MainWindow::onUpdateInstalled() {
     // Tell the user
     QMessageBox::information(this, "Updated", "Update has completed successfully!", QMessageBox::Ok);
     ui->btn_update->setText("Check for Update");
+    ui->btn_update->setEnabled(true);
 
     initialize_home();
     logger->log("Update installed successfully.");
@@ -885,13 +888,16 @@ void MainWindow::onUpdateFailed() {
     logger->log("=== UPDATE FAILED ===");
     QMessageBox::information(this, "Update failed.", "Update has failed! Please try again.", QMessageBox::Ok);
     ui->btn_update->setText("Check for Update");
+    ui->btn_update->setEnabled(true);
 }
 void MainWindow::onUpToDate() {
     logger->log("Modpack is up to date!");
+    ui->btn_update->setEnabled(true);
     QMessageBox::information(this, "Up to date", "The modpack is up to date!", QMessageBox::Ok);
 }
 void MainWindow::onOutOfDate() {
     logger->log("Modpack is out of date.");
+    ui->btn_update->setText("Update");
 
     // Check storage
     logger->log("Checking available space on current disk...");
@@ -899,6 +905,7 @@ void MainWindow::onOutOfDate() {
         // Tell the user they do not have enough storage until they have enough storage
         QString message = "WARNING: Not enough storage on current working disk (" + QDir::rootPath() + "). You MUST have at least 1 gigabyte of free space.";
         QMessageBox::information(this, "Not enough storage.", message, QMessageBox::Ok);
+        ui->btn_update->setEnabled(true);
         return;
     }
     logger->log("Checking available space on game disk...");
@@ -907,6 +914,7 @@ void MainWindow::onOutOfDate() {
             // Tell the user they do not have enough storage until they have enough storage
             QString message = "WARNING: Not enough storage on current game disk (" + QString(std::filesystem::path(gameDirectory).root_path().string().c_str()) + "). You MUST have at least 1 gigabyte of free space.";
             QMessageBox::information(this, "Not enough storage.", message, QMessageBox::Ok);
+            ui->btn_update->setEnabled(true);
             return;
         }
     }
