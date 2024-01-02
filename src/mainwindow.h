@@ -46,6 +46,7 @@ public:
     //===== Updates
     void update_console();
     void update_background();
+    void update_home();
 
     //===== Button Commands
     void clicked_next();

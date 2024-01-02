@@ -240,6 +240,7 @@ void MainWindow::initialize_connections() {
     connect(&manager, &Manager::updateUnzipped, this, &MainWindow::onUpdateUnzipped);
     connect(&manager, &Manager::updateInstalled, this, &MainWindow::onUpdateInstalled);
     connect(&manager, &Manager::updateFailed, this, &MainWindow::onUpdateFailed);
+    connect (&manager, &Manager::fetched, this, &MainWindow::update_home);
 }
 
 // Saves the user data
@@ -498,20 +499,27 @@ void MainWindow::initialize_cancel() {
 }
 
 void MainWindow::initialize_home() {
-    if (releaseUrl == "" || changelog == "") {
+    // Initialize the release url
+    if (releaseUrl == "") {
         // Get the latest release URL
         releaseUrl = manager.fetchLatestReleaseURL();
-        // Set the changelog, version, and other home page things
-        QString qVersion = manager.fetchLatestRelease(releaseUrl).object().find("tag_name")->toString();
-        QString qChangelog = manager.fetchLatestRelease(releaseUrl).object().find("body")->toString();
-        modpackVersion = qVersion.toStdString();
-        changelog = qChangelog.toStdString();
     }
 
-    // Set initial UI properties
-    ui->text_changelog->setMarkdown(QString(changelog.c_str()));
-    ui->label_version->setText(QString(modpackVersion.c_str()));
-    navigate(ui->stack_home, ui->page_index);
+    // Initialize installed release local variables
+    QJsonObject installation = manager.getInstallationRelease();
+    QString installedVersion = installation.value("tag_name").toString();
+    QString installedChangelog = installation.value("body").toString();
+    if (installedVersion != QString() && installedChangelog != QString()) {
+        ui->text_changelog->setMarkdown(installedChangelog);
+        ui->label_version->setText(installedVersion);
+    }
+
+    // Fetch the data
+    manager.doFetch();
+
+    // Show user that latest release data is loading
+    ui->label_versionLatest->setText("Checking...");
+    ui->text_changelogLatest->setMarkdown("Checking...");
 }
 
 //===== UPDATES
@@ -548,6 +556,26 @@ void MainWindow::update_console() {
 
 void MainWindow::update_background() {
 
+}
+
+void MainWindow::update_home() {
+    // Initialize latest release local variables
+    QJsonObject latest = manager.getLatestRelease();
+    QString latestVersion = latest.value("tag_name").toString();
+    QString latestChangelog = latest.value("body").toString();
+    if (latestVersion != QString() && latestChangelog != QString()) {
+        ui->text_changelogLatest->setMarkdown(latestChangelog);
+        ui->label_versionLatest->setText(latestVersion);
+    }
+
+    // Initialize installed release local variables
+    QJsonObject installation = manager.getInstallationRelease();
+    QString installedVersion = installation.value("tag_name").toString();
+    QString installedChangelog = installation.value("body").toString();
+    if (installedVersion != QString() && installedChangelog != QString()) {
+        ui->text_changelog->setMarkdown(installedChangelog);
+        ui->label_version->setText(installedVersion);
+    }
 }
 
 //===== WIDGET COMMANDS
