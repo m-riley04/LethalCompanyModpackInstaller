@@ -134,6 +134,8 @@ private:
     std::string gameDrive;
 
     std::string packUrl;
+    std::string installedModpackZipUrl;
+    std::string latestModpackZipUrl;
     std::string cacheDirectory;
     std::string userDataDirectory;
     std::string logPath;
