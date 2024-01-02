@@ -254,8 +254,6 @@ void MainWindow::save() {
         dataHandler.setValue("firstOpen", QVariant(firstOpen));
         dataHandler.setValue("releaseUrl", QVariant(releaseUrl.c_str()));
         dataHandler.setValue("githubUrl", QVariant(githubUrl.c_str()));
-        dataHandler.setValue("changelog", QVariant(changelog.c_str()));
-        dataHandler.setValue("modpackVersion", QVariant(modpackVersion.c_str()));
         dataHandler.setValue("gameDirectory", QVariant(gameDirectory.c_str()));
 
         // Save with data handler
@@ -276,8 +274,6 @@ void MainWindow::load() {
         firstOpen           = dataHandler.getValue("firstOpen", true).toBool();
         releaseUrl      = dataHandler.getValue("releaseUrl", "").toString().toStdString();
         githubUrl       = dataHandler.getValue("githubUrl", "").toString().toStdString();
-        changelog       = dataHandler.getValue("changelog", "").toString().toStdString();
-        modpackVersion      = dataHandler.getValue("modpackVersion", "1.0.0").toString().toStdString();
         gameDirectory       = dataHandler.getValue("gameDirectory", "").toString().toStdString();
     } catch (...) {
         logger->log("ERROR: Failed to reset user data");
@@ -291,10 +287,8 @@ void MainWindow::reset() {
         pageCompleted = true;
         modpackInstalled = false;
         firstOpen = true;
-        releaseUrl = "";
-        githubUrl = "github.com";
-        changelog = "";
-        modpackVersion = "1.0.0";
+        releaseUrl = "https://api.github.com/repos/m-riley04/TheWolfPack/releases/latest";
+        githubUrl = "https://github.com/m-riley04/TheWolfPack";
         gameDirectory = "";
 
         save();
@@ -847,9 +841,9 @@ void MainWindow::onInstallationError() {
 }
 void MainWindow::onUpdateChecked() {
     disconnect(&manager, &Manager::fetched, this, &MainWindow::onUpdateChecked);
-    modpackVersion = manager.getInstallationRelease().value("tag_name").toString().toStdString();
+    std::string installedVersion = manager.getInstallationRelease().value("tag_name").toString().toStdString();
     std::string latestVersion = manager.getLatestRelease().value("tag_name").toString().toStdString();
-    if (modpackVersion == latestVersion) {
+    if (installedVersion == latestVersion) {
         // Tell the user the modpack is up to date
         onUpToDate();
         return;
@@ -930,7 +924,7 @@ void MainWindow::onOutOfDate() {
         manager.clearConfig();
 
         // Fetch latest version
-        manager.doUpdateFetch("installed_release");
+        manager.doUpdateFetch();
     }
 }
 

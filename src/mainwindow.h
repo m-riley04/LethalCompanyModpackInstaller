@@ -103,8 +103,6 @@ private:
     bool firstOpen;
     std::string releaseUrl;
     std::string githubUrl;
-    std::string changelog;
-    std::string modpackVersion;
     std::string gameDirectory;
 };
 #endif // MAINWINDOW_H
