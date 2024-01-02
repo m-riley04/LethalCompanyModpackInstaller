@@ -746,7 +746,8 @@ void MainWindow::clicked_clearCache() {
 }
 
 void MainWindow::clicked_github() {
-    QDesktopServices::openUrl(QUrl(githubUrl.c_str()));
+    QUrl url(githubUrl.c_str());
+    QDesktopServices::openUrl(url);
 }
 
 void MainWindow::checked_eula() {
