@@ -162,6 +162,7 @@ MainWindow::MainWindow(QWidget *parent)
         initialize_home();
         ui->stack_installation->setCurrentWidget(ui->page_welcome);
         ui->stack_pages->setCurrentWidget(ui->page_home);
+        ui->stack_home->setCurrentWidget(ui->page_index);
     }
 }
 
@@ -210,6 +211,7 @@ void MainWindow::initialize_connections() {
     connect(ui->btn_next, &QPushButton::clicked, this, &MainWindow::clicked_next);
     connect(ui->btn_back, &QPushButton::clicked, this, &MainWindow::clicked_back);
     connect(ui->btn_browseLethalCompanyLocation, &QPushButton::clicked, this, &MainWindow::clicked_browse);
+    //connect(ui->btn_browseSettings, &QPushButton::clicked, this, &MainWindow::clicked_browse);
     connect(ui->btn_update, &QPushButton::clicked, this, &MainWindow::clicked_update);
     connect(ui->btn_restart, &QPushButton::clicked, this, &MainWindow::clicked_restart);
     connect(ui->btn_retry, &QPushButton::clicked, this, &MainWindow::clicked_restart);
@@ -217,8 +219,17 @@ void MainWindow::initialize_connections() {
     connect(ui->btn_home, &QPushButton::clicked, this, &MainWindow::clicked_home);
     connect(ui->btn_settings, &QPushButton::clicked, this, &MainWindow::clicked_settings);
     connect(ui->btn_github, &QPushButton::clicked, this, &MainWindow::clicked_github);
+    connect(ui->btn_managerGithub, &QPushButton::clicked, this, &MainWindow::clicked_managerGithub);
+    connect(ui->btn_clearCache, &QPushButton::clicked, this, &MainWindow::clicked_clearCache);
+    connect(ui->btn_uninstall, &QPushButton::clicked, this, &MainWindow::clicked_uninstall);
+    connect(ui->btn_open, &QPushButton::clicked, this, &MainWindow::clicked_openGameLocation);
+    connect(ui->btn_openAppLocation, &QPushButton::clicked, this, &MainWindow::clicked_openAppLocation);
+    connect(ui->btn_log, &QPushButton::clicked, this, &MainWindow::clicked_openLog);
+    connect(ui->btn_logError, &QPushButton::clicked, this, &MainWindow::clicked_openLog);
+    connect(ui->btn_logSettings, &QPushButton::clicked, this, &MainWindow::clicked_openLog);
     connect(ui->checkbox_eula, &QCheckBox::stateChanged, this, &MainWindow::checked_eula);
     connect(ui->line_lethalCompanyLocation, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
+    connect(ui->line_lethalCompanyLocationSettings, &QLineEdit::textChanged, this, &MainWindow::typed_gameLocation);
 
     //=== BepInEx signals/slots
     logger->log("Connecting BepInEx installation/download signals and slots...");
@@ -306,8 +317,10 @@ void MainWindow::clearCache() {
         std::filesystem::remove_all(cacheDirectory);
         std::filesystem::create_directory(cacheDirectory);
         logger->log("App cache has been cleared.");
+        QMessageBox::information(this, "Cache cleared.", "The application's cache has been removed from the system.");
         return;
     }
+    QMessageBox::warning(this, "Cache not cleared.", "The application ran into an unexpected error when clearing the cache. Cache was not cleared.");
     logger->log("App cache was not cleared successfully (path error)");
 }
 
@@ -498,6 +511,9 @@ void MainWindow::initialize_home() {
         // Get the latest release URL
         releaseUrl = manager.fetchLatestReleaseURL();
     }
+
+    // Set the game folder ui box
+    ui->line_lethalCompanyLocationSettings->setText(QString(gameDirectory.c_str()));
 
     // Initialize installed release local variables
     QJsonObject installation = manager.getInstallationRelease();
@@ -747,8 +763,60 @@ void MainWindow::clicked_clearCache() {
     clearCache();
 }
 
+void MainWindow::clicked_openGameLocation() {
+    logger->log("User opened the game's currently installed directory...");
+    std::string _path = gameDirectory;
+    qDebug() << _path;
+    QString path(_path.c_str());
+    QDesktopServices::openUrl(path);
+}
+
+void MainWindow::clicked_openAppLocation() {
+    logger->log("User opened the application's current directory...");
+    QDesktopServices::openUrl(QDir::currentPath());
+}
+
+void MainWindow::clicked_openLog() {
+    logger->log("User opened the log... hello!");
+    QDesktopServices::openUrl(QDir::currentPath() + "\\" + "log.txt");
+}
+
+void MainWindow::clicked_uninstall() {
+    logger->log("Confirming uninstallation...");
+    // Confirm if they want to reset
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Confirm", "Are you sure you would like to uninstall the modpack? This will clear the app cache/user data, delete BepInEx and modpack files, and restart the installation process.",
+                                  QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        logger->log("User has chosen to uninstasll the application.");
+
+        // Clear out the cache
+        clearCache();
+
+        // Uninstall the current installation
+        uninstall();
+
+        // Reset the user data
+        reset();
+
+        // Set initial pages
+        ui->stack_pages->setCurrentWidget(ui->page_installation);
+        ui->stack_installation->setCurrentWidget(ui->page_welcome);
+        ui->stack_home->setCurrentWidget(ui->page_index);
+        ui->stack_installation->setCurrentIndex(0);
+    } else {
+        logger->log("User has chosen NOT to uninstall the application.");
+    }
+}
+
 void MainWindow::clicked_github() {
+    logger->log("User opened the modpack github.");
     QUrl url(githubUrl.c_str());
+    QDesktopServices::openUrl(url);
+}
+
+void MainWindow::clicked_managerGithub() {
+    QUrl url("https://github.com/m-riley04/LethalCompanyModpackInstaller");
     QDesktopServices::openUrl(url);
 }
 
@@ -893,6 +961,7 @@ void MainWindow::onUpdateFailed() {
 void MainWindow::onUpToDate() {
     logger->log("Modpack is up to date!");
     ui->btn_update->setEnabled(true);
+    ui->btn_update->setText("Check for Update");
     QMessageBox::information(this, "Up to date", "The modpack is up to date!", QMessageBox::Ok);
 }
 void MainWindow::onOutOfDate() {

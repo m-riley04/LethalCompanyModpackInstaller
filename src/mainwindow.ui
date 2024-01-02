@@ -79,7 +79,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="page_welcome">
        <widget class="QFrame" name="frame_welcome">
@@ -295,7 +295,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </rect>
          </property>
          <property name="text">
-          <string>Lethal Company Location:</string>
+          <string>Lethal Company Folder:</string>
          </property>
         </widget>
         <widget class="QLineEdit" name="line_lethalCompanyLocation">
@@ -478,22 +478,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;gb&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-        </widget>
-        <widget class="QCheckBox" name="checkbox_shortcut">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>130</y>
-           <width>271</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Create shortcut for this modpack manager</string>
-         </property>
         </widget>
        </widget>
       </widget>
@@ -694,6 +678,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <string>Retry</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="btn_log">
+        <property name="geometry">
+         <rect>
+          <x>130</x>
+          <y>310</y>
+          <width>81</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Open Log</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="page_error">
        <widget class="QFrame" name="frame_error">
@@ -798,7 +795,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </rect>
          </property>
         </widget>
-        <widget class="QPushButton" name="btn_log">
+        <widget class="QPushButton" name="btn_logError">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -876,14 +873,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <widget class="QLabel" name="label">
        <property name="geometry">
         <rect>
-         <x>140</x>
+         <x>80</x>
          <y>0</y>
-         <width>521</width>
+         <width>651</width>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>24</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:700;&quot;&gt;The Wolf Pack Modpack Manager&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;The Wolf Pack Modpack Manager&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </widget>
@@ -897,16 +899,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_index">
        <widget class="QTextBrowser" name="text_changelogLatest">
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>130</y>
+          <y>140</y>
           <width>321</width>
-          <height>311</height>
+          <height>301</height>
          </rect>
         </property>
        </widget>
@@ -914,10 +916,15 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>80</y>
+          <y>100</y>
           <width>321</width>
           <height>41</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <underline>true</underline>
+         </font>
         </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Changelog&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -926,9 +933,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <widget class="QLabel" name="label_versionHeading">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>30</x>
           <y>40</y>
-          <width>151</width>
+          <width>131</width>
           <height>41</height>
          </rect>
         </property>
@@ -941,7 +948,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <rect>
           <x>160</x>
           <y>40</y>
-          <width>171</width>
+          <width>151</width>
           <height>41</height>
          </rect>
         </property>
@@ -952,6 +959,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
         <property name="text">
          <string>Version</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
        <widget class="QPushButton" name="btn_github">
@@ -970,24 +980,35 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <widget class="QLabel" name="label_versionHeading_2">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>30</x>
           <y>0</y>
-          <width>321</width>
+          <width>281</width>
           <height>41</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Latest Version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Latest Release&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_changelog_2">
         <property name="geometry">
          <rect>
           <x>350</x>
-          <y>80</y>
+          <y>100</y>
           <width>321</width>
           <height>41</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <underline>true</underline>
+         </font>
         </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Changelog&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -997,23 +1018,29 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <property name="geometry">
          <rect>
           <x>350</x>
-          <y>130</y>
+          <y>140</y>
           <width>321</width>
-          <height>311</height>
+          <height>301</height>
          </rect>
         </property>
        </widget>
        <widget class="QLabel" name="label_versionHeading_3">
         <property name="geometry">
          <rect>
-          <x>350</x>
+          <x>370</x>
           <y>0</y>
-          <width>321</width>
+          <width>281</width>
           <height>41</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Installed Version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Installed Release&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_version">
@@ -1021,7 +1048,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <rect>
           <x>500</x>
           <y>40</y>
-          <width>171</width>
+          <width>151</width>
           <height>41</height>
          </rect>
         </property>
@@ -1033,13 +1060,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <property name="text">
          <string>Version</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
        <widget class="QLabel" name="label_versionHeading_4">
         <property name="geometry">
          <rect>
-          <x>350</x>
+          <x>370</x>
           <y>40</y>
-          <width>151</width>
+          <width>131</width>
           <height>41</height>
          </rect>
         </property>
@@ -1047,21 +1077,202 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt;&quot;&gt;Version:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
+       <zorder>label_changelog</zorder>
+       <zorder>text_changelogLatest</zorder>
+       <zorder>label_versionHeading</zorder>
+       <zorder>label_versionLatest</zorder>
+       <zorder>btn_github</zorder>
+       <zorder>label_versionHeading_2</zorder>
+       <zorder>label_changelog_2</zorder>
+       <zorder>text_changelog</zorder>
+       <zorder>label_versionHeading_3</zorder>
+       <zorder>label_version</zorder>
+       <zorder>label_versionHeading_4</zorder>
       </widget>
       <widget class="QWidget" name="page_settings">
-       <widget class="QPushButton" name="btn_reset">
+       <widget class="QPushButton" name="btn_managerGithub">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>101</width>
+          <x>250</x>
+          <y>400</y>
+          <width>191</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string>Reset</string>
+         <string>Manager Github Repository</string>
         </property>
        </widget>
+       <widget class="QFrame" name="frame">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>661</width>
+          <height>161</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QPushButton" name="btn_open">
+         <property name="geometry">
+          <rect>
+           <x>570</x>
+           <y>60</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>Open</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>60</y>
+           <width>201</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Lethal Company Folder:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_versionHeading_5">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>281</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <bold>true</bold>
+           <underline>true</underline>
+          </font>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Application Data&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_reset">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>110</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_uninstall">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>110</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Uninstall</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_clearCache">
+         <property name="geometry">
+          <rect>
+           <x>230</x>
+           <y>110</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Clear Cache</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="line_lethalCompanyLocationSettings">
+         <property name="geometry">
+          <rect>
+           <x>210</x>
+           <y>60</y>
+           <width>351</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_openAppLocation">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>110</y>
+           <width>181</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Open Application Folder</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_logSettings">
+         <property name="geometry">
+          <rect>
+           <x>530</x>
+           <y>110</y>
+           <width>121</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Open Log File</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QLabel" name="label_versionHeading_6">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>270</y>
+          <width>591</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <bold>true</bold>
+          <underline>true</underline>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;For updates to this manager, please visit the manager's GitHub repository for releases.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <zorder>frame</zorder>
+       <zorder>btn_managerGithub</zorder>
+       <zorder>label_versionHeading_6</zorder>
       </widget>
      </widget>
      <widget class="QFrame" name="frame_navigation">
@@ -1109,7 +1320,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>460</y>
+         <y>470</y>
          <width>101</width>
          <height>31</height>
         </rect>

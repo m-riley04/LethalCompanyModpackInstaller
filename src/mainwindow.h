@@ -60,6 +60,11 @@ public:
     void clicked_reset();
     void clicked_clearCache();
     void clicked_github();
+    void clicked_managerGithub();
+    void clicked_uninstall();
+    void clicked_openAppLocation();
+    void clicked_openLog();
+    void clicked_openGameLocation();
 
     //===== Checkbox Commands
     void checked_eula();
