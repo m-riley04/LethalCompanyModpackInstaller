@@ -110,7 +110,7 @@ public slots:
     void onBepInExInstalled();
 
     // Updating
-    void doUpdateFetch(std::string filename = "latest_release");
+    void doUpdateFetch();
     void doUpdateDownload();
     void doUpdateUnzip();
     void doUpdateInstall();
@@ -120,9 +120,8 @@ public slots:
     void onUpdateInstalled();
     void onUpdateFailed();
 
-
     // General Fetching
-    void doFetch(std::string filename);
+    void doFetch();
     void onFetched();
 
 private:
