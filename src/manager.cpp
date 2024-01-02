@@ -598,6 +598,10 @@ int Manager::getSpaceAvailable() { return std::filesystem::space(std::filesystem
 //=== SETTERS
 void Manager::setVersion(std::string version) { this->version = version; }
 
+void Manager::setCacheDirectory(std::string directory) {this->cacheDirectory = directory; }
+
+void Manager::setDataDirectory(std::string directory) {this->userDataDirectory = directory; }
+
 void Manager::setGameDirectory(std::string directory) { this->gameDirectory = directory; }
 
 void Manager::setLogPath(std::string path) { this->logPath = path; }

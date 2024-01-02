@@ -59,6 +59,8 @@ public:
 
     //=== SETTERS
     void setVersion(std::string version);
+    void setCacheDirectory(std::string directory);
+    void setDataDirectory(std::string directory);
     void setGameDirectory(std::string directory);
     void setLogPath(std::string path);
 
