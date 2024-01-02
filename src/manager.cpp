@@ -104,7 +104,6 @@ void Manager::installBepInEx() {
     installer.install(installationFilesDirectory, gameDirectory);
 }
 
-// Updates the modpack
 void Manager::update() {
     // Download the latest version of the modpack
     Logger::log("Downloading latest modpack version...", logPath);
@@ -309,12 +308,6 @@ void Manager::doFetchModpack() {
     Logger::log("Modpack fetch thread started.", logPath);
 }
 void Manager::doDownload() {
-    // Get the latest release URL
-    Logger::log("Grabbing latest release URL...", logPath);
-    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
-    Logger::log("Latest Release: " + latestReleaseURL, logPath);
-    std::string url = this->fetchReleaseDownload(latestReleaseURL);
-    Logger::log("Latest Release Download: " + url, logPath);
     std::string filename = "latest_release";
 
     // Check if file is already in cache
@@ -326,7 +319,7 @@ void Manager::doDownload() {
     }
 
     // Implement threading
-    Downloader* worker      = new Downloader(url, cacheDirectory, filename);
+    Downloader* worker      = new Downloader(installedModpackZipUrl, cacheDirectory, filename);
     worker->moveToThread(&thread);
 
     connect(&thread, &QThread::started, worker, &Downloader::doDownload);
@@ -411,10 +404,11 @@ void Manager::doInstallBepInEx() {
 void Manager::doUninstall() {
     installer.doUninstall();
 }
-void Manager::doFetch(std::string filename) {
+void Manager::doFetch() {
     // Get the latest release URL
     Logger::log("Grabbing latest release URL...", logPath);
     std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
+    std::string filename = "latest_release";
 
     Downloader * worker     = new Downloader(latestReleaseURL, cacheDirectory, filename);
     worker->moveToThread(&thread);
@@ -426,7 +420,8 @@ void Manager::doFetch(std::string filename) {
     thread.start();
     Logger::log("Fetch thread started.", logPath);
 }
-void Manager::doUpdateFetch(std::string filename) {
+void Manager::doUpdateFetch() {
+    std::string filename = "installation_release";
     // Get the latest release URL
     Logger::log("Grabbing latest release URL...", logPath);
     std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
@@ -442,16 +437,10 @@ void Manager::doUpdateFetch(std::string filename) {
     Logger::log("Update fetch thread started.", logPath);
 }
 void Manager::doUpdateDownload() {
-    // Get the latest release URL
-    Logger::log("Grabbing latest release URL...", logPath);
-    std::string latestReleaseURL = this->fetchLatestReleaseURL("m-riley04", "TheWolfPack");
-    Logger::log("Latest Release: " + latestReleaseURL, logPath);
-    std::string url = this->fetchReleaseDownload(latestReleaseURL);
-    Logger::log("Latest Release Download: " + url, logPath);
-    std::string filename = "latest_release";
+    std::string filename = "installation_release";
 
     // Implement threading
-    Downloader* worker      = new Downloader(url, cacheDirectory, filename);
+    Downloader* worker      = new Downloader(latestModpackZipUrl, cacheDirectory, filename);
     worker->moveToThread(&thread);
 
     connect(&thread, &QThread::started, worker, &Downloader::doDownload);
@@ -500,7 +489,13 @@ void Manager::onBepInExInstalled() {
     emit bepInExInstalled();
 }
 void Manager::onModpackFetched() {
+    // Quit the thread
     thread.quit();
+
+    // Read the downloaded file
+    installedModpackZipUrl = getInstallationRelease().value("zipball_url").toString().toStdString();
+
+    // Emit signal
     emit modpackFetched();
 }
 void Manager::onModpackDownloaded() {
@@ -511,17 +506,29 @@ void Manager::onModpackUnzipped() {
     emit modpackUnzipped();
 }
 void Manager::onModpackInstalled() {
-    version = fetchLatestVersion(packUrl);
+    //version = fetchLatestVersion(packUrl);
 
     thread.quit();
     emit modpackInstalled();
 }
 void Manager::onFetched() {
+    // Quit the thread
     thread.quit();
+
+    // Read the downloaded file
+    latestModpackZipUrl = getLatestRelease().value("zipball_url").toString().toStdString();
+
+    // Emit signal
     emit fetched();
 }
 void Manager::onUpdateFetched() {
+    // Quit the thread
     thread.quit();
+
+    // Read the downloaded file
+    installedModpackZipUrl = getInstallationRelease().value("zipball_url").toString().toStdString();
+
+    // Emit signal
     emit updateFetched();
 }
 void Manager::onUpdateDownloaded() {
