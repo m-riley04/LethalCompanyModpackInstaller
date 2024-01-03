@@ -9,6 +9,7 @@
 #include <QFontDatabase>
 #include <QDesktopServices>
 #include <QScrollBar>
+#include <QProcess>
 
 /* When given a stylesheet string and a .var file path, replaces
  * all the variables found in the stylesheet string.
@@ -765,20 +766,26 @@ void MainWindow::clicked_clearCache() {
 
 void MainWindow::clicked_openGameLocation() {
     logger->log("User opened the game's currently installed directory...");
-    std::string _path = gameDirectory;
-    qDebug() << _path;
-    QString path(_path.c_str());
+    QString path(gameDirectory.c_str());
+    QString command = "explorer " + QString("\"") + path + QString(" \"");
+    QProcess::startDetached(command);
     QDesktopServices::openUrl(path);
 }
 
 void MainWindow::clicked_openAppLocation() {
     logger->log("User opened the application's current directory...");
-    QDesktopServices::openUrl(QDir::currentPath());
+    QString path = QDir::currentPath();
+    QString command = "explorer " + QString("\"") + path + QString(" \"");
+    QProcess::startDetached(command);
+    //QDesktopServices::openUrl(QDir::currentPath());
 }
 
 void MainWindow::clicked_openLog() {
     logger->log("User opened the log... hello!");
-    QDesktopServices::openUrl(QDir::currentPath() + "\\" + "log.txt");
+    QString path = QDir::currentPath() + "\\" + "log.txt";
+    QString command = "notepad " + QString("\"") + path + QString(" \"");
+    QProcess::startDetached(command);
+    //QDesktopServices::openUrl(QDir::currentPath() + "\\" + "log.txt");
 }
 
 void MainWindow::clicked_uninstall() {
