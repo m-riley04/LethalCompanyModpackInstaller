@@ -212,25 +212,34 @@ std::string Manager::locateGameLocation() {
     Logger::log("Iterating through common drives...", logPath);
     // Iterate through each drive
     for (auto & drive : commonDrives) {
+        // List of possible locations to check for each drive
+        std::string commonPaths[7] = {":\\Program Files (x86)\\Steam\\steamapps\\common",
+            ":\\Steam\\steamapps\\common",
+            ":\\Program Files\\Steam\\steamapps\\common",
+            ":\\SteamLibrary\\steamapps\\common",
+            ":\\Program Files (x86)\\SteamLibrary\\steamapps\\common",
+            ":\\Program Files\\SteamLibrary\\steamapps\\common",
+            ":\\Steam\\SteamLibrary\\steamapps\\common"};
+        // Iterate through each location for a specific drive
+        for (std::string & location : commonPaths) {
+            std::string pathStr = drive + location;
+            gamePath /= pathStr;
+            gamePath /= gameName;
 
-        std::string pathStr = drive;
-        pathStr += ":\\SteamLibrary\\steamapps\\common";
-        gamePath /= pathStr;
-        gamePath /= gameName;
+            Logger::log("Checking path: " + gamePath.string(), logPath);
 
-        Logger::log("Checking path: " + gamePath.string(), logPath);
+            // Check if the Steam game exists
+            if (std::filesystem::exists(gamePath)) {
+                Logger::log("Path exists!", logPath);
+                gameDirectory = gamePath.string();
+                gameDrive = drive;
+                gameDrive += ":\\";
+                return gamePath.string();
+            }
 
-        // Check if the Steam game exists
-        if (std::filesystem::exists(gamePath)) {
-            Logger::log("Path exists!", logPath);
-            gameDirectory = gamePath.string();
-            gameDrive = drive;
-            gameDrive += ":\\";
-            return gamePath.string();
+            // Otherwise, try again
+            gamePath.clear();
         }
-
-        // Otherwise, try again
-        gamePath.clear();
     }
 
     throw GameNotFoundException();
