@@ -1008,6 +1008,11 @@ void MainWindow::onOutOfDate() {
         manager.clearPlugins();
         manager.clearConfig();
 
+        // Delete the old json installed release
+        QString userDataPath = QDir::currentPath() + "\\user_data";
+        QDir userDataDir(userDataPath);
+        userDataDir.remove("installation_release.json");
+
         // Fetch latest version
         manager.doUpdateFetch();
     }

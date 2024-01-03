@@ -438,7 +438,7 @@ void Manager::doUpdateFetch() {
     Downloader * worker     = new Downloader(latestReleaseURL, userDataDirectory, filename);
     worker->moveToThread(&thread);
 
-    connect(&thread, &QThread::started, worker, &Downloader::doDownload);
+    connect(&thread, &QThread::started, worker, &Downloader::doDownloadJson);
     connect(&thread, &QThread::finished, worker, &QObject::deleteLater);
     connect(worker, &Downloader::downloadFinished, this, &Manager::onUpdateFetched);
 
