@@ -2,8 +2,15 @@
 # Lethal Company Modpack Manager
 This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https://github.com/m-riley04/veXs-Lethal-Company-Pack).
 
-# Compatible Versions
-- Lethal Company v45
+# Tables of Contents
+- [Features](#Features)
+- [How To Use](#How%20to%20use)
+    - [First Install](#How%20to%20use##First-Install)
+    - [Updating](#How%20to%20use##Updating)
+- [Troubleshooting](#Troubleshooting)
+- [Technicalities](#Technicalities)
+    - [Compatible Versions](#Technicalities##Compatible%20Versions)
+    - [Operating System](#Technicalities##Operating%20System)
 
 # Features
 - Automatic installation process
@@ -18,9 +25,6 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
 - Heavily documented and optimized
 - Tested and safe to use
 
-# Operating System
-- Windows 10+
-
 # How to use
 ## First-Install
 1. Download the latest release from the [releases page](https://github.com/m-riley04/LethalCompanyModpackInstaller/releases) (click on the TWPm_v#.#.#.zip)
@@ -32,4 +36,17 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
 ## Updating
 1. Open the modpack manager
 2. Click "Check for Updates" button
+
+# Troubleshooting
+Troubleshooting the manager is very easy using the built-in debugging tools in the Settings page. 
+## Crashes
+If the modpack manager crashes at any point, just simply restart it. If a crash occurs during the installation process, clearing the modpack's cache and a reinstallation of the modpack (not the manager) is recomended.
+## Incorrect Updates/Installs
+If the modpack is installed/updated but is missing important files or appears to have not downloaded correctly, it is recommended that you reinstall the modpack.
+
+# Technicalities
+## Compatible Versions
+- Lethal Company v45
+## Operating System
+- Windows 10+
 
