@@ -8,7 +8,7 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
     - [First Install](#First-Install)
     - [Updating](#Updating)
 - [Troubleshooting](#Troubleshooting)
-- [Technicalities](#Technicalities)
+- [Technicalities](#Technical-Specifications)
     - [Compatible Versions](#Compatible-Versions)
     - [Operating System](#Operating-System)
 
@@ -46,7 +46,7 @@ If the modpack manager crashes at any point, just simply restart it. If a crash 
 ## Incorrect Updates/Installs
 If the modpack is installed/updated but is missing important files, missing mods in-game, or appears to have not downloaded correctly, it is recommended that you reinstall the modpack.
 
-# Technicalities
+# Technical Specifications
 ## Compatible Versions
 - Lethal Company v45
 ## Operating System
