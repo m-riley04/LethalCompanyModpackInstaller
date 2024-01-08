@@ -30,8 +30,10 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
 1. Download the latest release from the [releases page](https://github.com/m-riley04/LethalCompanyModpackInstaller/releases) (click on the TWPm_v#.#.#.zip with the cube icon next to)
 2. Extract the downloaded zip file into a folder
 3. Run "LethalCompanyModpackInstaller.exe"
-4. Follow the installation steps
-5. (Optional) Create a shortcut of the .exe to put on your desktop
+    - If Windows Defender tries to stop you, just click "More Info" and click "Run Anyways"
+    - If you have 3rd-party antivirus that may interfere with the program, please whitelist the program within your antivirus' settings
+5. Follow the installation steps
+6. (Optional) Create a shortcut of the .exe to put on your desktop
 
 ## Updating
 1. Open the modpack manager
