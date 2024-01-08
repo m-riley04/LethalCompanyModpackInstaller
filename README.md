@@ -8,7 +8,7 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
     - [First Install](#First-Install)
     - [Updating](#Updating)
 - [Troubleshooting](#Troubleshooting)
-- [Technicalities](#Technical-Specifications)
+- [Technical Specifications](#Technical-Specifications)
     - [Compatible Versions](#Compatible-Versions)
     - [Operating System](#Operating-System)
 
