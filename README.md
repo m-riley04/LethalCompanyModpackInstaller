@@ -44,7 +44,7 @@ Troubleshooting the manager is very easy using the built-in debugging tools in t
 ## Crashes
 If the modpack manager crashes at any point, just simply restart it. If a crash occurs during the installation process, clearing the modpack's cache and a reinstallation of the modpack (not the manager) is recomended.
 ## Incorrect Updates/Installs
-If the modpack is installed/updated but is missing important files or appears to have not downloaded correctly, it is recommended that you reinstall the modpack.
+If the modpack is installed/updated but is missing important files, missing mods in-game, or appears to have not downloaded correctly, it is recommended that you reinstall the modpack.
 
 # Technicalities
 ## Compatible Versions
