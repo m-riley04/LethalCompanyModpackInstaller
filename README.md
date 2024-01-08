@@ -4,13 +4,13 @@ This is a modpack manager for the Lethal Company modpack [The Wolf Pack](https:/
 
 # Tables of Contents
 - [Features](#Features)
-- [How To Use](#How%20to%20use)
-    - [First Install](#How%20to%20use##First-Install)
-    - [Updating](#How%20to%20use##Updating)
+- [How To Use](#How-to-use)
+    - [First Install](#How-to-use##First-Install)
+    - [Updating](#How-to-use##Updating)
 - [Troubleshooting](#Troubleshooting)
 - [Technicalities](#Technicalities)
-    - [Compatible Versions](#Technicalities##Compatible%20Versions)
-    - [Operating System](#Technicalities##Operating%20System)
+    - [Compatible Versions](#Technicalities##Compatible-Versions)
+    - [Operating System](#Technicalities##Operating-System)
 
 # Features
 - Automatic installation process
